@@ -2,4 +2,3 @@ name = "banner-studio-pro"
 pages_build_output_dir = ".output"
 compatibility_date = "2025-09-24"
 compatibility_flags = ["nodejs_compat"]
-main = "@tanstack/react-start/server-entry"
