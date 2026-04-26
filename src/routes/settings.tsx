@@ -1,9 +1,9 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import {
   KeyRound, Zap, Cookie, Eye, EyeOff, Save, RotateCcw,
-  CheckCircle2, ChevronRight, Settings2, LogOut
+  CheckCircle2, ChevronRight, Settings2, LogOut, AlertTriangle
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -125,20 +125,22 @@ function SettingsPage() {
         style={{ background: "oklch(0.12 0.014 25 / 0.97)", backdropFilter: "blur(24px)" }}>
         <div className="flex h-12 items-center justify-between px-3 md:px-5">
           <div className="flex items-center gap-2">
-            <div className="grid h-7 w-7 md:h-8 md:w-8 shrink-0 place-items-center rounded-xl"
-              style={{ background: "linear-gradient(135deg,oklch(0.55 0.25 15),oklch(0.62 0.23 25))", boxShadow: "0 0 16px oklch(0.55 0.25 15 / 0.4)" }}>
-              <Settings2 className="h-3.5 w-3.5 md:h-4 md:w-4 text-white" />
-            </div>
-            <div className="hidden sm:block">
-              <div className="text-sm font-bold">Settings</div>
-              <div className="text-[9px] text-muted-foreground">Cấu hình kết nối API</div>
-            </div>
+            <Link to="/" className="flex items-center gap-2 group transition-all">
+              <div className="grid h-7 w-7 md:h-8 md:w-8 shrink-0 place-items-center rounded-xl transition-transform group-hover:scale-110"
+                style={{ background: "linear-gradient(135deg,oklch(0.55 0.25 15),oklch(0.62 0.23 25))", boxShadow: "0 0 16px oklch(0.55 0.25 15 / 0.4)" }}>
+                <Settings2 className="h-3.5 w-3.5 md:h-4 md:w-4 text-white" />
+              </div>
+              <div className="hidden sm:block">
+                <div className="text-sm font-bold group-hover:text-primary transition-colors">Settings</div>
+                <div className="text-[9px] text-muted-foreground leading-none mt-0.5">Cấu hình kết nối API</div>
+              </div>
+            </Link>
           </div>
           <nav className="flex items-center gap-0.5 rounded-xl border border-white/[0.08] bg-white/[0.04] p-0.5 md:p-1">
-            <a href="/" className="rounded-lg px-3 md:px-5 py-1 md:py-1.5 text-[11px] md:text-[12px] font-medium text-muted-foreground hover:text-foreground hover:bg-white/[0.07] transition-all">✦ Studio</a>
-            <a href="/history" className="rounded-lg px-3 md:px-5 py-1 md:py-1.5 text-[11px] md:text-[12px] font-medium text-muted-foreground hover:text-foreground hover:bg-white/[0.07] transition-all">Lịch sử</a>
-            <a href="/settings" className="rounded-lg px-3 md:px-5 py-1 md:py-1.5 text-[11px] md:text-[12px] font-bold transition-all"
-              style={{ background: "linear-gradient(135deg,oklch(0.55 0.25 15),oklch(0.62 0.23 25))", color: "white", boxShadow: "0 0 14px oklch(0.55 0.25 15 / 0.4)" }}>Settings</a>
+            <Link to="/studio" className="rounded-lg px-3 md:px-5 py-1 md:py-1.5 text-[11px] md:text-[12px] font-medium text-muted-foreground hover:text-foreground hover:bg-white/[0.07] transition-all">✦ Studio</Link>
+            <Link to="/history" className="rounded-lg px-3 md:px-5 py-1 md:py-1.5 text-[11px] md:text-[12px] font-medium text-muted-foreground hover:text-foreground hover:bg-white/[0.07] transition-all">Lịch sử</Link>
+            <Link to="/settings" className="rounded-lg px-3 md:px-5 py-1 md:py-1.5 text-[11px] md:text-[12px] font-bold transition-all"
+              style={{ background: "linear-gradient(135deg,oklch(0.55 0.25 15),oklch(0.62 0.23 25))", color: "white", boxShadow: "0 0 14px oklch(0.55 0.25 15 / 0.4)" }}>Settings</Link>
           </nav>
           <div className="flex items-center w-10 md:w-[88px] justify-end">
             {user && (
@@ -170,6 +172,58 @@ function SettingsPage() {
             Chọn 1 loại kết nối phù hợp. Mỗi tab hướng dẫn riêng, không trộn lẫn.
           </p>
         </div>
+
+        {/* Trạng thái kết nối chi tiết (đã chuyển từ index.tsx sang) */}
+        {(() => {
+          const AUTH_MODES = [
+            { id: "apikey"  as const, label: "API Key",      icon: <KeyRound className="h-3.5 w-3.5" />, filled: !!s.apiKey },
+            { id: "bearer"  as const, label: "Access Token", icon: <Zap className="h-3.5 w-3.5" />,      filled: !!s.accessToken },
+            { id: "cookie"  as const, label: "Cookies",      icon: <Cookie className="h-3.5 w-3.5" />,   filled: !!s.cookies },
+          ];
+          const active = AUTH_MODES.find((m) => m.id === s.authMode) ?? AUTH_MODES[0];
+
+          if (active.filled) {
+            return (
+              <div className="mb-6 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 rounded-xl border border-emerald-500/20 bg-emerald-500/8 px-3.5 py-2.5 text-[12px]">
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-400" />
+                  <span className="text-emerald-300 font-medium">Đã kết nối: {active.label}</span>
+                </div>
+                
+                {/* Vạch kẻ dọc trên PC */}
+                <div className="hidden sm:block w-px h-3.5 bg-emerald-500/20" />
+
+                {/* Danh sách các kết nối phụ */}
+                <div className="flex flex-wrap items-center gap-4 border-t border-emerald-500/10 sm:border-0 pt-2 sm:pt-0 mt-0.5 sm:mt-0">
+                  {AUTH_MODES.filter((m) => m.id !== active.id).map((m) => (
+                    <span key={m.id} className={`inline-flex items-center gap-1.5 text-[11px] ${m.filled ? "text-emerald-400/80" : "text-muted-foreground/50"}`}>
+                      {m.icon} {m.label} {m.filled ? <span className="font-bold text-emerald-400">✓</span> : <span className="opacity-40">—</span>}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            );
+          }
+
+          const bestAlt = AUTH_MODES.find((m) => m.id !== active.id && m.filled);
+          return (
+            <div className="mb-6 flex flex-col sm:flex-row sm:items-center gap-2.5 sm:gap-4 rounded-xl border border-destructive/30 bg-destructive/8 px-3.5 py-2.5 text-[12px] text-destructive-foreground">
+              <div className="flex items-center gap-2 font-medium">
+                <AlertTriangle className="h-4 w-4 shrink-0 text-destructive" />
+                <span>Chưa có {active.label} (chế độ đang chọn)</span>
+              </div>
+              
+              <div className="hidden sm:block w-px h-3.5 bg-destructive/20" />
+
+              <div className="text-[11px] sm:text-[12px] opacity-90 border-t border-destructive/10 sm:border-0 pt-2 sm:pt-0 mt-0.5 sm:mt-0">
+                {bestAlt
+                  ? <>Bạn đã có <strong className="text-emerald-400 mx-1">{bestAlt.label}</strong> — hãy chọn tab bên dưới để sử dụng →</>
+                  : <>Vui lòng điền thông tin bên dưới để kích hoạt →</>
+                }
+              </div>
+            </div>
+          );
+        })()}
 
         {/* ── AUTH TAB SELECTOR ─────────────────────────────────────────── */}
         <div className="grid grid-cols-3 gap-2 md:gap-3 mb-1">

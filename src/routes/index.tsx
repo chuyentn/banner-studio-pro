@@ -1,789 +1,236 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect, useMemo, useRef, useState } from "react";
-import { toast } from "sonner";
-import {
-  Sparkles,
-  Wand2,
-  Loader2,
-  Download,
-  ImageIcon,
-  AlertTriangle,
-  Check,
-  CheckCircle2,
-  RefreshCw,
-  Upload,
-  FileJson,
-  KeyRound,
-  Zap,
-  Cookie,
-  LogOut,
-} from "lucide-react";
-
-
-import { ImageDropzone } from "@/components/ImageDropzone";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { Sparkles, Zap, ShieldCheck, Layers, ArrowRight, Star, CheckCircle2, Wand2, ImageIcon, Layout } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-
-import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { cn } from "@/lib/utils";
-import {
-  type ApiSettings,
-  loadApiSettings,
-  saveHistoryItem,
-  isProjectState,
-  type ProjectState,
-} from "@/lib/storage";
-import {
-  type Quality,
-  type Ratio,
-  STYLE_VARIANTS,
-  generateVariants,
-  regenerateOne,
-  AUTO_TYPO_ID,
-  getAllowedQualities,
-  clampQuality,
-  RATIO_LABELS,
-  QUALITY_LABELS,
-  type GenerateParams,
-} from "@/lib/banner-api";
-import { TYPO_CATEGORIES } from "@/lib/typography";
-import { useAuth } from "@/lib/auth-context";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Studio · Banner Studio" },
+      { title: "Banner Studio Pro — AI Banner Generator" },
       {
         name: "description",
         content:
-          "Tạo banner sản phẩm chuyên nghiệp bằng AI: upload ảnh cảm hứng + sản phẩm, nhận về nhiều phong cách.",
+          "Nền tảng tạo ảnh banner quảng cáo AI hàng loạt cho thương hiệu. Chuyên nghiệp, nhanh chóng và hiệu quả.",
       },
     ],
   }),
-  component: StudioPage,
+  component: LandingPage,
 });
 
-type SlotState =
-  | { status: "idle" }
-  | { status: "uploading" }
-  | { status: "generating" }
-  | { status: "done"; url: string }
-  | { status: "error"; message: string };
-
-const MAX_VARIATIONS = STYLE_VARIANTS.length;
-
-function StudioPage() {
-  const { user, loading: authLoading, logout } = useAuth();
-  const navigate = useNavigate();
-
-  // Auth guard — redirect to login if not authenticated
-  useEffect(() => {
-    if (!authLoading && !user) {
-      navigate({ to: "/login" });
-    }
-  }, [user, authLoading, navigate]);
-
-  const [settings, setSettings] = useState<ApiSettings>(loadApiSettings);
-  const [inspiration, setInspiration] = useState<string[]>([]);
-  const [products, setProducts] = useState<string[]>([]);
-  const [brandLogo, setBrandLogo] = useState<string[]>([]);
-  const [kolAvatar, setKolAvatar] = useState<string[]>([]);
-  const [brand, setBrand] = useState("");
-  const [productInfo, setProductInfo] = useState("");
-  const [prompt, setPrompt] = useState("");
-  const [ratio, setRatio] = useState<Ratio>("1:1");
-  const [quality, setQuality] = useState<Quality>("1k");
-
-  // Auto-clamp quality when ratio changes (Coachio constraints)
-  const handleRatioChange = (v: string) => {
-    const r = v as Ratio;
-    setRatio(r);
-    setQuality((q) => clampQuality(r, q));
-  };
-  const allowedQualities = getAllowedQualities(ratio);
-  const [typographyId, setTypographyId] = useState<string>(AUTO_TYPO_ID);
-  const [variations, setVariations] = useState<number>(5);
-  const [variantPrompts, setVariantPrompts] = useState<string[]>(Array(8).fill(""));
-  const [slots, setSlots] = useState<SlotState[]>(
-    Array.from({ length: 5 }, () => ({ status: "idle" }) as SlotState),
-  );
-  const [running, setRunning] = useState(false);
-  const importRef = useRef<HTMLInputElement>(null);
-
-  const setVariantPrompt = (idx: number, val: string) =>
-    setVariantPrompts((prev) => { const n = [...prev]; n[idx] = val; return n; });
-
-
-  useEffect(() => {
-    setSettings(loadApiSettings());
-  }, []);
-
-  // resync slot count when variations change
-  useEffect(() => {
-    setSlots((prev) => {
-      const next = Array.from(
-        { length: variations },
-        (_, i) => prev[i] ?? ({ status: "idle" } as SlotState),
-      );
-      return next;
-    });
-  }, [variations]);
-
-  const params: GenerateParams = useMemo(
-    () => ({
-      settings,
-      inspirationImages: inspiration,
-      productImages: [...products, ...kolAvatar, ...brandLogo],
-      prompt,
-      brand,
-      productInfo,
-      ratio,
-      quality,
-      typographyId,
-      variations,
-      variantPrompts,
-    }),
-    [settings, inspiration, products, kolAvatar, brandLogo, prompt, brand, productInfo, ratio, quality, typographyId, variations, variantPrompts],
-  );
-
-  // Check if the ACTIVE auth mode has a credential filled in
-  const hasAuth = (() => {
-    if (settings.authMode === "bearer") return !!settings.accessToken;
-    if (settings.authMode === "cookie") return !!settings.cookies;
-    return !!settings.apiKey; // default: apikey
-  })();
-
-  const canGenerate =
-    !running &&
-    hasAuth &&
-    !!settings.baseUrl &&
-    (inspiration.length > 0 || products.length > 0);
-
-  // Keyboard shortcut: Ctrl/Cmd+Enter to generate
-  useEffect(() => {
-    function onKey(e: KeyboardEvent) {
-      if ((e.ctrlKey || e.metaKey) && e.key === "Enter" && canGenerate && !running) {
-        e.preventDefault();
-        onGenerate();
-      }
-    }
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [canGenerate, running]);
-
-  async function onGenerate() {
-    if (!hasAuth) {
-      const modeLabel =
-        settings.authMode === "bearer" ? "Access Token" :
-        settings.authMode === "cookie" ? "Cookies" : "API Key";
-      toast.error(`Chưa có ${modeLabel}`, {
-        description: `Vào trang Settings để thêm ${modeLabel}.`,
-      });
-      return;
-    }
-    if (inspiration.length === 0 && products.length === 0) {
-      toast.error("Cần ảnh đầu vào", {
-        description: "Upload ảnh cảm hứng hoặc ảnh sản phẩm.",
-      });
-      return;
-    }
-    setRunning(true);
-    setSlots(Array.from({ length: variations }, () => ({ status: "uploading" } as SlotState)));
-
-    const { results, errors } = await generateVariants(params, (idx, status, payload) => {
-      setSlots((prev) => {
-        const next = [...prev];
-        if (status === "done") next[idx] = { status: "done", url: payload };
-        else if (status === "error") next[idx] = { status: "error", message: payload };
-        else if (status === "uploading") next[idx] = { status: "uploading" };
-        else if (status === "generating") next[idx] = { status: "generating" };
-        return next;
-      });
-    });
-
-    setRunning(false);
-
-    const ok = results.filter(Boolean) as string[];
-    if (ok.length === 0) {
-      toast.error("Tạo banner thất bại", {
-        description: errors.find(Boolean) || "Không có ảnh nào được tạo.",
-      });
-      return;
-    }
-    toast.success(`Đã tạo ${ok.length}/${variations} banner`);
-
-    saveHistoryItem({
-      id: `${Date.now()}`,
-      createdAt: Date.now(),
-      brand,
-      prompt,
-      ratio,
-      quality,
-      results: ok,
-      thumb: ok[0],
-    });
-  }
-
-  async function onRegenerate(idx: number, adjustment: string) {
-    if (!hasAuth) {
-      const modeLabel =
-        settings.authMode === "bearer" ? "Access Token" :
-        settings.authMode === "cookie" ? "Cookies" : "API Key";
-      toast.error(`Chưa có ${modeLabel}`, {
-        description: `Vào trang Settings để thêm ${modeLabel}.`,
-      });
-      return;
-    }
-    setSlots((prev) => {
-      const next = [...prev];
-      next[idx] = { status: "uploading" };
-      return next;
-    });
-    try {
-      const url = await regenerateOne(params, idx, adjustment);
-      setSlots((prev) => {
-        const next = [...prev];
-        next[idx] = { status: "done", url };
-        return next;
-      });
-      toast.success(`Đã tạo lại banner #${idx + 1}`);
-    } catch (e) {
-      const msg = e instanceof Error ? e.message : "Lỗi không xác định";
-      setSlots((prev) => {
-        const next = [...prev];
-        next[idx] = { status: "error", message: msg };
-        return next;
-      });
-      toast.error("Tạo lại thất bại", { description: msg });
-    }
-  }
-
-  function downloadAll() {
-    slots.forEach((s, i) => {
-      if (s.status === "done") downloadImage(s.url, `banner-${i + 1}.png`);
-    });
-  }
-
-  function exportJson() {
-    const outputs = slots
-      .map((s, i) =>
-        s.status === "done"
-          ? { idx: i, styleName: STYLE_VARIANTS[i]?.name ?? `Variant ${i + 1}`, url: s.url }
-          : null,
-      )
-      .filter(Boolean) as ProjectState["outputs"];
-
-    const state: ProjectState = {
-      version: 2,
-      exportedAt: Date.now(),
-      brand,
-      productInfo,
-      prompt,
-      ratio,
-      quality,
-      variations,
-      typographyId,
-      inspirationImages: inspiration,
-      productImages: products,
-      brandLogo,
-      kolAvatar,
-      outputs,
-    };
-    const blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
-    const objUrl = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = objUrl;
-    a.download = `banner-studio-${new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-")}.json`;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    // Delay revoke: revoking immediately can cause empty file on Firefox
-    setTimeout(() => URL.revokeObjectURL(objUrl), 1000);
-    toast.success("Đã export JSON", {
-      description: `${outputs.length} ảnh output đã được nhúng.`,
-    });
-  }
-
-  function importJson(file: File) {
-    const reader = new FileReader();
-    reader.onload = () => {
-      try {
-        const data = JSON.parse(reader.result as string);
-        if (!isProjectState(data)) {
-          toast.error("File JSON không hợp lệ");
-          return;
-        }
-        setBrand(data.brand ?? "");
-        setProductInfo(data.productInfo ?? "");
-        setPrompt(data.prompt ?? "");
-        setRatio((data.ratio as Ratio) ?? "1:1");
-        setQuality((data.quality as Quality) ?? "1k");
-        setVariations(
-          Math.min(MAX_VARIATIONS, Math.max(1, data.variations ?? 5)),
-        );
-        setTypographyId(data.typographyId ?? AUTO_TYPO_ID);
-        setInspiration(data.inspirationImages ?? []);
-        setProducts(data.productImages ?? []);
-        setBrandLogo(data.brandLogo ?? []);
-        setKolAvatar(data.kolAvatar ?? []);
-        if (Array.isArray((data as Record<string,unknown>).variantPrompts)) {
-          setVariantPrompts((data as Record<string,unknown>).variantPrompts as string[]);
-        }
-        const restored: SlotState[] = Array.from(
-          { length: Math.min(MAX_VARIATIONS, Math.max(1, data.variations ?? 5)) },
-          () => ({ status: "idle" }) as SlotState,
-        );
-        for (const o of data.outputs ?? []) {
-          if (o.idx >= 0 && o.idx < restored.length) {
-            restored[o.idx] = { status: "done", url: o.url };
-          }
-        }
-        setSlots(restored);
-        toast.success("Đã import dự án", {
-          description: `${data.outputs?.length ?? 0} ảnh đã khôi phục.`,
-        });
-      } catch {
-        toast.error("Không đọc được file JSON");
-      }
-    };
-    reader.readAsText(file);
-  }
-
-  const doneCount = slots.filter((s) => s.status === "done").length;
-
+function LandingPage() {
   return (
-    <div className="studio-bg min-h-screen flex flex-col text-foreground">
-
-      {/* ═══ FIXED HEADER ═══════════════════════════════════════════════════ */}
-      <header className="sticky top-0 z-50 border-b border-white/[0.07]"
-        style={{ background: "oklch(0.12 0.014 25 / 0.97)", backdropFilter: "blur(24px)" }}>
-        <div className="flex h-12 shrink-0 items-center justify-between px-3 md:px-5">
-          {/* Logo */}
-          <div className="flex items-center gap-2 min-w-0">
-            <div className="grid h-7 w-7 md:h-8 md:w-8 shrink-0 place-items-center rounded-xl"
-              style={{ background: "linear-gradient(135deg,oklch(0.55 0.25 15),oklch(0.62 0.23 25))", boxShadow: "0 0 16px oklch(0.55 0.25 15 / 0.5)" }}>
-              <Sparkles className="h-3.5 w-3.5 md:h-4 md:w-4 text-white" />
+    <div className="min-h-screen bg-[#030303] text-foreground selection:bg-primary/30 overflow-x-hidden">
+      {/* ─── NAV ───────────────────────────────────────────────────────────── */}
+      <nav className="fixed top-0 z-[100] w-full border-b border-white/5 bg-black/60 backdrop-blur-xl">
+        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
+          <div className="flex items-center gap-2.5">
+            <div className="grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-br from-primary to-accent shadow-lg shadow-primary/20">
+              <Sparkles className="h-5 w-5 text-white" />
             </div>
-            <div className="hidden sm:block">
-              <div className="text-sm font-bold tracking-tight leading-none">Banner Studio</div>
-              <div className="text-[9px] text-muted-foreground leading-none mt-0.5">GPT Image · Coachio AI</div>
-            </div>
-            <span className="badge-ai ml-1 hidden sm:inline">AI</span>
+            <span className="text-lg font-bold tracking-tight">Banner Studio <span className="text-primary text-xs ml-1 uppercase tracking-widest px-1.5 py-0.5 rounded-full bg-primary/10 border border-primary/20">Pro</span></span>
           </div>
-
-          {/* Tab navigation */}
-          <nav className="flex items-center gap-0.5 rounded-xl border border-white/[0.08] bg-white/[0.04] p-0.5 md:p-1">
-            <a href="/"
-              className="rounded-lg px-3 md:px-5 py-1 md:py-1.5 text-[11px] md:text-[12px] font-bold transition-all"
-              style={{ background: "linear-gradient(135deg,oklch(0.55 0.25 15),oklch(0.62 0.23 25))", color: "white", boxShadow: "0 0 14px oklch(0.55 0.25 15 / 0.45)" }}>
-              ✦ Studio
-            </a>
-            <a href="/history"
-              className="rounded-lg px-3 md:px-5 py-1 md:py-1.5 text-[11px] md:text-[12px] font-medium text-muted-foreground hover:text-foreground hover:bg-white/[0.07] transition-all">
-              Lịch sử
-            </a>
-            <a href="/settings"
-              className="rounded-lg px-3 md:px-5 py-1 md:py-1.5 text-[11px] md:text-[12px] font-medium text-muted-foreground hover:text-foreground hover:bg-white/[0.07] transition-all">
-              Settings
-            </a>
-          </nav>
-
-          {/* Right actions */}
-          <div className="flex items-center gap-1.5 md:gap-2">
-            <Button variant="glow" size="sm" onClick={() => importRef.current?.click()} className="h-7 text-[10px] md:text-[11px] gap-1 md:gap-1.5 px-2 md:px-3">
-              <Upload className="h-3 w-3 md:h-3.5 md:w-3.5" /> <span className="hidden sm:inline">Import</span>
-            </Button>
-            <Button variant="glow" size="sm" onClick={exportJson} className="h-7 text-[10px] md:text-[11px] gap-1 md:gap-1.5 px-2 md:px-3">
-              <FileJson className="h-3 w-3 md:h-3.5 md:w-3.5" /> <span className="hidden sm:inline">Export</span>
-            </Button>
-            <input ref={importRef} type="file" accept="application/json" className="hidden"
-              onChange={(e) => { const f = e.target.files?.[0]; if (f) importJson(f); e.currentTarget.value = ""; }} />
-
-            {/* User avatar */}
-            {user && (
-              <div className="flex items-center gap-1.5 ml-1 border-l border-white/[0.08] pl-2">
-                <div className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-white/[0.08] text-[10px] font-bold text-foreground overflow-hidden"
-                  title={user.email || ""}>
-                  {user.photoURL ? (
-                    <img src={user.photoURL} alt="" className="h-full w-full object-cover" referrerPolicy="no-referrer" />
-                  ) : (
-                    (user.displayName || user.email || "U").charAt(0).toUpperCase()
-                  )}
-                </div>
-                <button type="button" onClick={() => logout()} title="Đăng xuất"
-                  className="grid h-7 w-7 shrink-0 place-items-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-white/[0.08] transition-colors">
-                  <LogOut className="h-3.5 w-3.5" />
-                </button>
-              </div>
-            )}
+          <div className="hidden md:flex items-center gap-8 text-sm font-medium text-muted-foreground">
+            <a href="#features" className="hover:text-foreground transition-colors">Tính năng</a>
+            <a href="#workflow" className="hover:text-foreground transition-colors">Quy trình</a>
+            <a href="#pricing" className="hover:text-foreground transition-colors">Bảng giá</a>
           </div>
+          <Link to="/studio">
+            <Button variant="glow" size="sm" className="h-9 px-5 gap-2 font-bold">
+              Bắt đầu ngay <ArrowRight className="h-3.5 w-3.5" />
+            </Button>
+          </Link>
         </div>
-      </header>
+      </nav>
 
-      {/* ═══ SINGLE COLUMN CONTENT ══════════════════════════════════════════ */}
-      <div className="relative z-10 w-full max-w-[1600px] mx-auto px-3 md:px-5 pb-10 flex-1">
-
-        {/* Auth status banner — smart per-mode */}
-        {(() => {
-          const AUTH_MODES = [
-            { id: "apikey"  as const, label: "API Key",      icon: <KeyRound className="h-3.5 w-3.5" />, filled: !!settings.apiKey },
-            { id: "bearer"  as const, label: "Access Token", icon: <Zap className="h-3.5 w-3.5" />,      filled: !!settings.accessToken },
-            { id: "cookie"  as const, label: "Cookies",      icon: <Cookie className="h-3.5 w-3.5" />,   filled: !!settings.cookies },
-          ];
-          const active = AUTH_MODES.find((m) => m.id === settings.authMode) ?? AUTH_MODES[0];
-
-          if (active.filled) {
-            // Connected — show green status pill
-            return (
-              <div className="mt-4 flex items-center gap-2 rounded-xl border border-emerald-500/20 bg-emerald-500/8 px-4 py-2.5 text-[12px]">
-                <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-400" />
-                <span className="text-emerald-300 font-medium">Đã kết nối: {active.label}</span>
-                <span className="text-muted-foreground/60">·</span>
-                {AUTH_MODES.filter((m) => m.id !== active.id).map((m) => (
-                  <span key={m.id} className={`inline-flex items-center gap-1 text-[10px] ${m.filled ? "text-emerald-400/70" : "text-muted-foreground/40"}`}>
-                    {m.icon} {m.label} {m.filled ? "✓" : "—"}
-                  </span>
-                ))}
-              </div>
-            );
-          }
-
-          // Not connected — show warning with helpful hint
-          const bestAlt = AUTH_MODES.find((m) => m.id !== active.id && m.filled);
-          return (
-            <div className="mt-4 flex items-center gap-2 rounded-xl border border-destructive/30 bg-destructive/8 px-4 py-2.5 text-[12px] text-destructive-foreground">
-              <AlertTriangle className="h-4 w-4 shrink-0 text-destructive" />
-              <span>
-                Chưa có <strong>{active.label}</strong> (chế độ đang chọn).
-                {bestAlt
-                  ? <> Bạn đã có <strong className="text-emerald-400">{bestAlt.label}</strong> — <a href="/settings" className="underline font-semibold">đổi sang trong Settings →</a></>
-                  : <> <a href="/settings" className="underline font-semibold">Vào Settings để cài đặt →</a></>
-                }
-              </span>
-            </div>
-          );
-        })()}
-
-        {/* ── ROW 1: Pinterest / Banner mẫu ───────────────────────────────── */}
-        <section className="mt-5">
-          <div className="mb-2 flex items-center gap-2.5">
-            <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">📌 Pinterest / Banner mẫu</span>
-            <span className="text-[10px] text-muted-foreground/50">Nhiều ảnh — dùng chung làm style ref</span>
-            {inspiration.length > 0 && (
-              <span className="rounded-full bg-accent/15 px-2 py-0.5 text-[9px] font-semibold text-primary">{inspiration.length} ảnh</span>
-            )}
-          </div>
-          <ImageDropzone
-            label="Kéo thả hoặc click để upload ảnh Pinterest, banner mẫu, mood board…"
-            hint=""
-            images={inspiration}
-            onChange={setInspiration}
-            max={12}
-            accent="accent"
-            density="compact"
-          />
-        </section>
-
-        {/* ── ROW 2: Ảnh sản phẩm ─────────────────────────────────────────── */}
-        <section className="mt-4">
-          <div className="mb-2 flex items-center gap-2.5">
-            <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">🖼 Ảnh sản phẩm</span>
-            <span className="text-[10px] text-muted-foreground/50">Nhiều góc / nhiều ảnh đều được</span>
-            {products.length > 0 && (
-              <span className="rounded-full bg-primary/15 px-2 py-0.5 text-[9px] font-semibold text-primary">{products.length} ảnh</span>
-            )}
-          </div>
-          <ImageDropzone
-            label="Kéo thả hoặc click để upload ảnh sản phẩm của bạn…"
-            hint=""
-            images={products}
-            onChange={setProducts}
-            max={10}
-            density="compact"
-          />
-        </section>
-
-        {/* ── ROW 3: Info + Controls ───────────────────────────────────────── */}
-        <section className="mt-4 grid grid-cols-1 gap-3 md:gap-4 md:grid-cols-3">
-          {/* Col 1: Product info */}
-          <div className="space-y-4">
-            <div className="space-y-1.5">
-              <label className="text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground">Thông tin sản phẩm</label>
-              <Textarea
-                placeholder="Mô tả sản phẩm: Serum dưỡng ẩm 24h chiết xuất rau má, 30ml…"
-                value={productInfo}
-                onChange={(e) => setProductInfo(e.target.value)}
-                rows={3}
-                className="resize-none text-xs bg-white/[0.04] border-white/[0.08] placeholder:text-muted-foreground/40"
-              />
+      <main>
+        {/* ─── HERO ──────────────────────────────────────────────────────────── */}
+        <section className="relative pt-32 pb-20 md:pt-48 md:pb-32">
+          {/* Background decoration */}
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-4xl h-[500px] bg-primary/10 blur-[120px] rounded-full pointer-events-none opacity-50" />
+          
+          <div className="mx-auto max-w-7xl px-6 text-center">
+            <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] font-bold uppercase tracking-widest text-primary mb-8 animate-in fade-in slide-in-from-bottom-4 duration-1000">
+              <Zap className="h-3 w-3 fill-primary" /> 
+              Sức mạnh AI cho thương hiệu của bạn
             </div>
             
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <ImageDropzone
-                label="Logo thương hiệu"
-                hint="Tuỳ chọn"
-                images={brandLogo}
-                onChange={setBrandLogo}
-                max={1}
-                density="compact"
-              />
-              <ImageDropzone
-                label="Ảnh KOL / Đại sứ"
-                hint="Tuỳ chọn"
-                images={kolAvatar}
-                onChange={setKolAvatar}
-                max={1}
-                density="compact"
-              />
+            <h1 className="text-5xl md:text-7xl lg:text-8xl font-black tracking-tighter leading-[0.9] mb-8 bg-gradient-to-b from-white via-white/90 to-white/50 bg-clip-text text-transparent animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-100">
+              TẠO BANNER QUẢNG CÁO <br className="hidden md:block" />
+              ĐẲNG CẤP VỚI AI
+            </h1>
+            
+            <p className="mx-auto max-w-2xl text-lg md:text-xl text-muted-foreground mb-10 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-200">
+              Biến ảnh sản phẩm thành hàng loạt banner chuyên nghiệp chỉ trong vài giây. 
+              Không cần thiết kế, không cần máy mạnh. <span className="text-foreground">AI làm tất cả cho bạn.</span>
+            </p>
+            
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-300">
+              <Link to="/studio">
+                <Button size="lg" className="h-14 px-10 text-lg font-bold gap-3 rounded-2xl shadow-2xl shadow-primary/30">
+                  <Wand2 className="h-5 w-5" /> Bắt đầu tạo ngay
+                </Button>
+              </Link>
+              <Button variant="outline" size="lg" className="h-14 px-10 text-lg font-bold border-white/10 bg-white/5 hover:bg-white/10 rounded-2xl">
+                Xem demo video
+              </Button>
             </div>
-          </div>
-          {/* Col 2: Brand + Prompt */}
-          <div className="space-y-1.5">
-            <label className="text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground">Thương hiệu</label>
-            <Input placeholder="NovaSkin, Acme Coffee…" value={brand} onChange={(e) => setBrand(e.target.value)}
-              className="h-9 text-xs bg-white/[0.04] border-white/[0.08]" />
-            <label className="mt-2 block text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground">Prompt tuỳ chọn</label>
-            <Textarea
-              placeholder='VD: "nền be, mood mùa thu, không logo"…'
-              value={prompt}
-              onChange={(e) => setPrompt(e.target.value)}
-              rows={2}
-              className="resize-none text-xs bg-white/[0.04] border-white/[0.08] placeholder:text-muted-foreground/40"
-            />
-          </div>
-          {/* Col 3: Typography + Ratio + Quality + Variations */}
-          <div className="space-y-2.5">
-            <div>
-              <label className="text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground">Typography</label>
-              <Select value={typographyId} onValueChange={setTypographyId}>
-                <SelectTrigger className="mt-1 h-8 text-xs bg-white/[0.04] border-white/[0.08]"><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value={AUTO_TYPO_ID}>Auto — AI tự chọn</SelectItem>
-                  {TYPO_CATEGORIES.map((c) => <SelectItem key={c.id} value={c.id}>{c.label}</SelectItem>)}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              <div>
-                <label className="text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground">Tỷ lệ</label>
-                <Select value={ratio} onValueChange={handleRatioChange}>
-                  <SelectTrigger className="mt-1 h-8 text-xs bg-white/[0.04] border-white/[0.08]"><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    {(Object.keys(RATIO_LABELS) as Ratio[]).map((r) => <SelectItem key={r} value={r}>{RATIO_LABELS[r]}</SelectItem>)}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <label className="text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground flex items-center gap-1">
-                  Chất lượng {allowedQualities.length < 3 && <span className="text-[8px] text-primary normal-case">(hạn chế)</span>}
-                </label>
-                <Select value={quality} onValueChange={(v) => setQuality(v as Quality)}>
-                  <SelectTrigger className="mt-1 h-8 text-xs bg-white/[0.04] border-white/[0.08]"><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    {(Object.keys(QUALITY_LABELS) as Quality[]).map((q) => (
-                      <SelectItem key={q} value={q} disabled={!allowedQualities.includes(q)}>{QUALITY_LABELS[q]}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+
+            {/* Hero Image / Mockup */}
+            <div className="mt-20 relative animate-in fade-in zoom-in duration-1500 delay-500">
+              <div className="absolute -inset-1 rounded-[2.5rem] bg-gradient-to-r from-primary/30 to-accent/30 blur opacity-20" />
+              <div className="relative rounded-[2rem] border border-white/10 bg-[#0a0a0a] p-2 md:p-4 overflow-hidden shadow-2xl">
+                 <div className="aspect-[16/9] rounded-2xl bg-gradient-to-br from-white/5 to-white/[0.02] border border-white/5 flex items-center justify-center">
+                    <div className="flex flex-col items-center gap-4 text-muted-foreground/20">
+                       <Layout className="h-16 w-16" />
+                       <span className="text-sm font-medium tracking-widest uppercase italic">AI Studio Workspace Preview</span>
+                    </div>
+                 </div>
               </div>
             </div>
-            <div>
-              <label className="text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground flex justify-between">
-                Số phong cách <span className="text-foreground font-bold">{variations}</span>
-              </label>
-              <input type="range" min={1} max={MAX_VARIATIONS} value={variations}
-                onChange={(e) => setVariations(Number(e.target.value))}
-                className="mt-1 w-full accent-[var(--primary)]" />
+          </div>
+        </section>
+
+        {/* ─── STATS ────────────────────────────────────────────────────────── */}
+        <section className="py-20 border-y border-white/5 bg-white/[0.01]">
+          <div className="mx-auto max-w-7xl px-6">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+              {[
+                { label: "Banners đã tạo", val: "1.2M+" },
+                { label: "Thương hiệu tin dùng", val: "500+" },
+                { label: "Tốc độ tạo", val: "< 10s" },
+                { label: "Độ phân giải", val: "4K UHD" },
+              ].map((s, i) => (
+                <div key={i}>
+                  <div className="text-3xl md:text-4xl font-black text-white mb-1">{s.val}</div>
+                  <div className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">{s.label}</div>
+                </div>
+              ))}
             </div>
           </div>
         </section>
 
-        {/* ── GENERATE BUTTON ──────────────────────────────────────────────── */}
-        <section className="mt-5">
-          <button
-            className="btn-generate w-full rounded-2xl py-4 text-[15px] font-bold text-white flex items-center justify-center gap-3 disabled:cursor-not-allowed disabled:opacity-50"
-            disabled={!canGenerate}
-            onClick={onGenerate}
-          >
-            {running
-              ? <><Loader2 className="h-5 w-5 animate-spin" />Đang tạo {variations} banner…</>
-              : <><Wand2 className="h-5 w-5" />Tạo {variations} phong cách banner</>
-            }
-          </button>
-          <div className="mt-1.5 flex items-center justify-center gap-4 text-[9px] text-muted-foreground">
-            <span>⌨ Ctrl+Enter</span>
-            <span>·</span>
-            <span>{doneCount}/{variations} hoàn thành</span>
-          </div>
-        </section>
-
-        {/* ── RESULTS ──────────────────────────────────────────────────────── */}
-        <section className="mt-7">
-          <div className="mb-3 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Sparkles className="h-4 w-4 text-primary" />
-              <h1 className="text-[13px] font-bold">Kết quả · {variations} phong cách</h1>
-              {doneCount > 0 && (
-                <span className="rounded-full bg-primary/15 px-2 py-0.5 text-[9px] text-primary font-semibold">{doneCount} xong</span>
-              )}
+        {/* ─── FEATURES ──────────────────────────────────────────────────────── */}
+        <section id="features" className="py-32 relative overflow-hidden">
+          <div className="absolute right-0 top-1/4 w-96 h-96 bg-accent/5 blur-[100px] rounded-full pointer-events-none" />
+          <div className="mx-auto max-w-7xl px-6">
+            <div className="text-center mb-20">
+              <h2 className="text-3xl md:text-5xl font-black tracking-tight mb-4">MẠNH MẼ VÀ THÔNG MINH</h2>
+              <p className="text-muted-foreground max-w-2xl mx-auto">Chúng tôi cung cấp mọi công cụ bạn cần để biến ý tưởng thành những chiến dịch quảng cáo triệu đô.</p>
             </div>
-            <Button variant="glow" size="sm" disabled={doneCount === 0} onClick={downloadAll} className="h-7 text-[11px] gap-1">
-              <Download className="h-3.5 w-3.5" /> Tải tất cả
-            </Button>
-          </div>
 
-          <div className={cn(
-            "grid gap-3 md:gap-4",
-            variations === 1 ? "grid-cols-1 max-w-sm" :
-            variations === 2 ? "grid-cols-1 sm:grid-cols-2" :
-            variations === 3 ? "grid-cols-1 sm:grid-cols-2 md:grid-cols-3" :
-            variations === 4 ? "grid-cols-1 sm:grid-cols-2 md:grid-cols-4" :
-            "grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5"
-          )}>
-            {slots.map((slot, i) => (
-              <ResultCard
-                key={i}
-                title={STYLE_VARIANTS[i]?.name ?? `Variant ${i + 1}`}
-                hint={STYLE_VARIANTS[i]?.hint ?? ""}
-                ratio={ratio}
-                slot={slot}
-                index={i + 1}
-                variantPrompt={variantPrompts[i] ?? ""}
-                onVariantPromptChange={(v) => setVariantPrompt(i, v)}
-                onRegenerate={(adj) => onRegenerate(i, adj)}
-                busy={running}
-              />
-            ))}
+            <div className="grid md:grid-cols-3 gap-6">
+              {[
+                {
+                  icon: <Zap className="h-6 w-6 text-primary" />,
+                  title: "Công nghệ Coachio AI",
+                  desc: "Sử dụng model GPT Image 2 mạnh mẽ nhất từ Coachio để tạo ra những khung hình có chiều sâu và ánh sáng cinematic."
+                },
+                {
+                  icon: <ShieldCheck className="h-6 w-6 text-primary" />,
+                  title: "Nhận diện thương hiệu",
+                  desc: "Chèn Logo và KOL đại sứ một cách tự nhiên với các tuỳ chỉnh vị trí, kích thước và độ mờ chuyên sâu."
+                },
+                {
+                  icon: <Layers className="h-6 w-6 text-primary" />,
+                  title: "Sản xuất hàng loạt",
+                  desc: "Chỉ với 1 click, tạo ra hàng chục phong cách khác nhau từ Editorial cho đến Street/Lifestyle cho cùng một sản phẩm."
+                },
+                {
+                  icon: <ImageIcon className="h-6 w-6 text-primary" />,
+                  title: "Chất lượng 4K UHD",
+                  desc: "Hỗ trợ xuất file ở độ phân giải cực cao, sắc nét đến từng chi tiết, sẵn sàng cho in ấn và chạy quảng cáo Facebook/TikTok."
+                },
+                {
+                  icon: <Star className="h-6 w-6 text-primary" />,
+                  title: "Style Ref Thông Minh",
+                  desc: "Học hỏi phong cách từ Pinterest hoặc các banner mẫu bạn yêu thích để tạo ra kết quả đồng bộ với brand book."
+                },
+                {
+                  icon: <CheckCircle2 className="h-6 w-6 text-primary" />,
+                  title: "Quy trình đơn giản",
+                  desc: "Không cần biết Photoshop, không cần Prompt phức tạp. Mọi thao tác đều được tối ưu hóa cho người dùng không chuyên."
+                }
+              ].map((f, i) => (
+                <div key={i} className="group p-8 rounded-3xl border border-white/5 bg-white/[0.02] hover:bg-white/[0.04] transition-all hover:border-primary/20">
+                  <div className="mb-6 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-white/5 group-hover:bg-primary/10 group-hover:scale-110 transition-all">
+                    {f.icon}
+                  </div>
+                  <h3 className="text-xl font-bold mb-3">{f.title}</h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed">{f.desc}</p>
+                </div>
+              ))}
+            </div>
           </div>
         </section>
 
-      </div>
+        {/* ─── CTA ───────────────────────────────────────────────────────────── */}
+        <section className="py-32">
+          <div className="mx-auto max-w-5xl px-6">
+            <div className="relative rounded-[3rem] overflow-hidden bg-gradient-to-br from-primary/20 to-accent/20 border border-white/10 p-12 md:p-20 text-center">
+              <div className="absolute inset-0 bg-black/40 backdrop-blur-3xl -z-10" />
+              <h2 className="text-4xl md:text-6xl font-black tracking-tight mb-6">SẴN SÀNG ĐỂ TỎA SÁNG?</h2>
+              <p className="text-lg md:text-xl text-muted-foreground mb-10 max-w-2xl mx-auto">
+                Đừng để đối thủ vượt mặt bằng những hình ảnh tầm thường. 
+                Nâng tầm thương hiệu của bạn với Banner Studio Pro ngay hôm nay.
+              </p>
+              <Link to="/studio">
+                <Button size="lg" className="h-16 px-12 text-xl font-bold gap-4 rounded-2xl">
+                  Bắt đầu miễn phí <ArrowRight className="h-6 w-6" />
+                </Button>
+              </Link>
+              <div className="mt-8 flex items-center justify-center gap-4 text-xs font-medium text-muted-foreground uppercase tracking-widest">
+                <span className="flex items-center gap-1.5"><CheckCircle2 className="h-3 w-3 text-primary" /> Không cần thẻ tín dụng</span>
+                <span className="w-1 h-1 rounded-full bg-white/20" />
+                <span className="flex items-center gap-1.5"><CheckCircle2 className="h-3 w-3 text-primary" /> Hoàn trả token nếu lỗi</span>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      {/* ─── FOOTER ────────────────────────────────────────────────────────── */}
+      <footer className="py-20 border-t border-white/5 bg-black">
+        <div className="mx-auto max-w-7xl px-6">
+          <div className="flex flex-col md:flex-row justify-between items-start gap-10">
+            <div className="max-w-xs">
+               <div className="flex items-center gap-2.5 mb-6">
+                  <div className="grid h-8 w-8 place-items-center rounded-lg bg-primary">
+                    <Sparkles className="h-4 w-4 text-white" />
+                  </div>
+                  <span className="text-lg font-bold tracking-tight">Banner Studio Pro</span>
+               </div>
+               <p className="text-sm text-muted-foreground mb-6">AI phải phục vụ bạn. Không phải ngược lại. Nền tảng tạo banner quảng cáo hàng đầu Việt Nam.</p>
+               <div className="flex gap-4">
+                  <div className="h-8 w-8 rounded-full bg-white/5 hover:bg-white/10 transition-colors border border-white/5" />
+                  <div className="h-8 w-8 rounded-full bg-white/5 hover:bg-white/10 transition-colors border border-white/5" />
+                  <div className="h-8 w-8 rounded-full bg-white/5 hover:bg-white/10 transition-colors border border-white/5" />
+               </div>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-16">
+               <div className="flex flex-col gap-4">
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-white/40">Sản phẩm</span>
+                  <a href="#" className="text-sm text-muted-foreground hover:text-primary transition-colors">Banner AI</a>
+                  <a href="#" className="text-sm text-muted-foreground hover:text-primary transition-colors">Video AI (Beta)</a>
+                  <a href="#" className="text-sm text-muted-foreground hover:text-primary transition-colors">API for Enterprise</a>
+               </div>
+               <div className="flex flex-col gap-4">
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-white/40">Công ty</span>
+                  <a href="#" className="text-sm text-muted-foreground hover:text-primary transition-colors">Về chúng tôi</a>
+                  <a href="#" className="text-sm text-muted-foreground hover:text-primary transition-colors">Bảo mật</a>
+                  <a href="#" className="text-sm text-muted-foreground hover:text-primary transition-colors">Điều khoản</a>
+               </div>
+               <div className="flex flex-col gap-4">
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-white/40">Hỗ trợ</span>
+                  <a href="#" className="text-sm text-muted-foreground hover:text-primary transition-colors">HDSD</a>
+                  <a href="#" className="text-sm text-muted-foreground hover:text-primary transition-colors">Contact</a>
+                  <a href="#" className="text-sm text-muted-foreground hover:text-primary transition-colors">Cộng đồng</a>
+               </div>
+            </div>
+          </div>
+          <div className="mt-20 pt-8 border-t border-white/5 text-center">
+             <p className="text-xs text-muted-foreground">© 2026 Banner Studio Pro. Tất cả quyền được bảo lưu.</p>
+          </div>
+        </div>
+      </footer>
     </div>
   );
-}
-
-function ResultCard({ title, hint, ratio, slot, index, variantPrompt, onVariantPromptChange, onRegenerate, busy }: {
-  title: string; hint: string; ratio: Ratio; slot: SlotState; index: number;
-  variantPrompt: string;
-  onVariantPromptChange: (v: string) => void;
-  onRegenerate: (adjustment: string) => void; busy: boolean;
-}) {
-  const [adj, setAdj] = useState("");
-  const isLoading = slot.status === "uploading" || slot.status === "generating";
-  const aspect =
-    ratio === "1:1" ? "aspect-square"
-    : ratio === "16:9" ? "aspect-video"
-    : ratio === "9:16" ? "aspect-[9/16]"
-    : ratio === "4:5" ? "aspect-[4/5]"
-    : ratio === "21:9" ? "aspect-[21/9]"
-    : ratio === "4:3" ? "aspect-[4/3]"
-    : ratio === "3:2" ? "aspect-[3/2]"
-    : ratio === "5:4" ? "aspect-[5/4]"
-    : ratio === "2:3" ? "aspect-[2/3]"
-    : "aspect-[3/4]";
-
-  return (
-    <div className="result-card flex flex-col rounded-xl border border-white/[0.08] overflow-hidden" style={{background:"oklch(0.16 0.014 25 / 0.9)", backdropFilter:"blur(12px)"}}>
-      {/* Card header */}
-      <div className="flex items-center justify-between px-3 py-2 border-b border-white/[0.06]">
-        <div className="flex items-center gap-1.5 min-w-0">
-          <span className="grid h-5 w-5 shrink-0 place-items-center rounded-md text-[10px] font-bold" style={{background:"linear-gradient(135deg,oklch(0.55 0.25 15),oklch(0.62 0.23 25))", color:"white"}}>{index}</span>
-          <span className="truncate text-[11px] font-semibold">{title}</span>
-        </div>
-        <StatusPill slot={slot} />
-      </div>
-
-      {/* Image area */}
-      <div className={cn("relative overflow-hidden bg-black/30", aspect)}>
-        {slot.status === "done" ? (
-          <>
-            <img src={slot.url} alt={title} className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 hover:opacity-100 transition-opacity flex items-end justify-end p-2">
-              <button type="button" onClick={() => downloadImage(slot.url, `banner-${index}.png`)}
-                className="inline-flex items-center gap-1 rounded-lg bg-white/90 px-2.5 py-1.5 text-[11px] font-medium text-black backdrop-blur hover:bg-white transition-colors">
-                <Download className="h-3 w-3" /> Tải xuống
-              </button>
-            </div>
-          </>
-        ) : isLoading ? (
-          <div className="absolute inset-0 shimmer-bg flex flex-col items-center justify-center gap-2">
-            <Loader2 className="h-6 w-6 animate-spin text-primary" />
-            <div className="text-[11px] text-muted-foreground">
-              {slot.status === "uploading" ? "Đang upload ảnh…" : "AI đang vẽ…"}
-            </div>
-          </div>
-        ) : slot.status === "error" ? (
-          <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 p-3 bg-destructive/5">
-            <AlertTriangle className="h-5 w-5 text-destructive" />
-            <div className="text-center text-[10px] text-muted-foreground line-clamp-3">{slot.message}</div>
-          </div>
-        ) : (
-          <div className="absolute inset-0 flex flex-col items-center justify-center gap-1.5 text-muted-foreground/40">
-            <ImageIcon className="h-8 w-8" />
-            <div className="text-[10px]">Chưa có ảnh</div>
-          </div>
-        )}
-      </div>
-
-      {/* Style hint */}
-      <p className="px-3 py-1.5 text-[10px] text-muted-foreground/70 line-clamp-1 border-b border-white/[0.04]">{hint}</p>
-
-      {/* Per-variant prompt */}
-      <div className="px-2 pt-2 pb-1">
-        <div className="flex items-center gap-1 mb-1">
-          <span className="text-[9px] font-semibold uppercase tracking-wider text-primary/70">Prompt riêng</span>
-          {variantPrompt && <span className="text-[8px] rounded-full bg-primary/15 px-1.5 py-0.5 text-primary">✓ Đã đặt</span>}
-        </div>
-        <Textarea
-          value={variantPrompt}
-          onChange={(e) => onVariantPromptChange(e.target.value)}
-          placeholder={`Tuỳ chỉnh cho "${title}"…\nVD: nền trắng, không chữ, focus vào sản phẩm`}
-          rows={2}
-          className="resize-none text-[11px] bg-white/[0.03] border-white/[0.06] placeholder:text-muted-foreground/40"
-          disabled={isLoading || busy}
-        />
-      </div>
-
-      {/* Regenerate */}
-      <div className="flex items-center gap-1.5 px-2 pb-2">
-        <Input value={adj} onChange={(e) => setAdj(e.target.value)}
-          placeholder="Tạo lại + điều chỉnh: nền tối, đổi tagline…"
-          className="h-7 flex-1 text-[11px] bg-white/[0.04] border-white/[0.08]"
-          disabled={isLoading || busy} />
-        <Button size="sm" variant="glow" className="h-7 w-7 p-0 shrink-0"
-          disabled={isLoading || busy} onClick={() => onRegenerate(adj)} title="Tạo lại banner này">
-          <RefreshCw className={cn("h-3.5 w-3.5", isLoading && "animate-spin")} />
-        </Button>
-      </div>
-    </div>
-  );
-}
-
-function StatusPill({ slot }: { slot: SlotState }) {
-  if (slot.status === "done")
-    return <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/15 px-2 py-0.5 text-[9px] font-medium text-emerald-400"><Check className="h-2.5 w-2.5" />Done</span>;
-  if (slot.status === "uploading")
-    return <span className="inline-flex items-center gap-1 rounded-full bg-blue-500/15 px-2 py-0.5 text-[9px] text-blue-400"><Loader2 className="h-2.5 w-2.5 animate-spin" />Upload</span>;
-  if (slot.status === "generating")
-    return <span className="inline-flex items-center gap-1 rounded-full bg-primary/15 px-2 py-0.5 text-[9px] text-primary"><Loader2 className="h-2.5 w-2.5 animate-spin" />AI</span>;
-  if (slot.status === "error")
-    return <span className="inline-flex items-center gap-1 rounded-full bg-destructive/15 px-2 py-0.5 text-[9px] text-destructive">Lỗi</span>;
-  return <span className="rounded-full bg-white/[0.06] px-2 py-0.5 text-[9px] text-muted-foreground">Chờ</span>;
-}
-
-function downloadImage(url: string, filename: string) {
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = filename;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
 }
