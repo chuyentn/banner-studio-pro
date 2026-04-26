@@ -1,51 +1,34 @@
 import fs from 'fs';
 import path from 'path';
 
+// Sanitize the auto-generated wrangler.json in dist/client
+// The @cloudflare/vite-plugin dumps ALL wrangler schema fields into this file,
+// including many that Cloudflare Pages validation rejects:
+//   - "triggers" must have "crons" property (generated as empty {})
+//   - dev.enable_containers, dev.generate_types are unknown
+//   - python_modules, ai_search, secrets_store_secrets etc. are unsupported
+// This script keeps ONLY the fields Cloudflare Pages actually needs.
+
 const wranglerPath = path.resolve('dist/client/wrangler.json');
 
 if (fs.existsSync(wranglerPath)) {
   try {
     const data = JSON.parse(fs.readFileSync(wranglerPath, 'utf8'));
-    
-    // Remove invalid triggers
-    delete data.triggers;
-    
-    // Remove invalid top-level fields
-    const invalidTopLevelFields = [
-      "definedEnvironments",
-      "ai_search_namespaces",
-      "ai_search",
-      "secrets_store_secrets",
-      "unsafe_hello_world",
-      "flagship",
-      "worker_loaders",
-      "ratelimits",
-      "vpc_services",
-      "vpc_networks",
-      "python_modules"
-    ];
-    for (const field of invalidTopLevelFields) {
-      delete data[field];
-    }
-    
-    // Remove invalid dev fields
-    if (data.dev) {
-      delete data.dev.enable_containers;
-      delete data.dev.generate_types;
-    }
 
-    // Fix absolute paths which break Linux environments
-    delete data.configPath;
-    delete data.userConfigPath;
-    if (data.pages_build_output_dir) {
-      data.pages_build_output_dir = ".output";
-    }
+    // Build a clean config with only the fields Cloudflare Pages accepts
+    const clean = {
+      name: data.name || 'banner-studio-pro',
+      compatibility_date: data.compatibility_date || '2025-09-24',
+      compatibility_flags: data.compatibility_flags || [],
+      assets: data.assets || { directory: '.' },
+    };
 
-    fs.writeFileSync(wranglerPath, JSON.stringify(data, null, 2));
-    console.log('✅ Sanitized dist/client/wrangler.json for Cloudflare Pages deployment.');
+    fs.writeFileSync(wranglerPath, JSON.stringify(clean, null, 2));
+    console.log('✅ Sanitized dist/client/wrangler.json — kept only valid Pages fields.');
   } catch (error) {
-    console.error('Failed to sanitize wrangler.json:', error);
+    console.error('❌ Failed to sanitize wrangler.json:', error);
+    process.exit(1);
   }
 } else {
-  console.log('⚠️ dist/client/wrangler.json not found, skipping sanitization.');
+  console.log('⚠️ dist/client/wrangler.json not found, skipping.');
 }
