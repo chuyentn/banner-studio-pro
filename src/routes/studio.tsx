@@ -101,7 +101,7 @@ function StudioPage() {
   const [ratio, setRatio] = useState<Ratio>("1:1");
   const [quality, setQuality] = useState<Quality>("1k");
 
-  // Auto-clamp quality when ratio changes (Coachio constraints)
+  // Auto-clamp quality when ratio changes (Coach.io.vn API constraints)
   const handleRatioChange = (v: string) => {
     const r = v as Ratio;
     setRatio(r);
@@ -377,14 +377,18 @@ function StudioPage() {
           <div className="flex items-center gap-2 min-w-0">
             <Link to="/" className="flex items-center gap-2 group transition-all">
               <div className="grid h-7 w-7 md:h-8 md:w-8 shrink-0 place-items-center rounded-xl transition-transform group-hover:scale-110"
-                style={{ background: "linear-gradient(135deg,oklch(0.55 0.25 15),oklch(0.62 0.23 25))", boxShadow: "0 0 16px oklch(0.55 0.25 15 / 0.5)" }}>
+                style={{ background: "linear-gradient(135deg,oklch(0.55 0.25 280),oklch(0.45 0.25 290))", boxShadow: "0 0 16px oklch(0.55 0.25 280 / 0.5)" }}>
                 <Sparkles className="h-3.5 w-3.5 md:h-4 md:w-4 text-white" />
               </div>
               <div className="hidden sm:block">
                 <div className="text-sm font-bold tracking-tight leading-none group-hover:text-primary transition-colors">Banner Studio</div>
-                <div className="text-[9px] text-muted-foreground leading-none mt-0.5">GPT Image · Coachio AI</div>
+                <div className="text-[9px] text-muted-foreground leading-none mt-0.5">GPT Image · Coach.io.vn</div>
               </div>
             </Link>
+            <div className="hidden md:flex items-center gap-6 ml-8 border-l border-white/[0.08] pl-8">
+              <Link to="/" className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground hover:text-white transition-colors">Trang chủ</Link>
+              <Link to="/pricing" className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground hover:text-white transition-colors">Bảng giá</Link>
+            </div>
             <span className="badge-ai ml-1 hidden sm:inline">AI</span>
 
             {/* Trạng thái Live / Thiếu API */}
@@ -405,7 +409,7 @@ function StudioPage() {
           <nav className="flex items-center gap-0.5 rounded-xl border border-white/[0.08] bg-white/[0.04] p-0.5 md:p-1">
             <Link to="/studio"
               className="rounded-lg px-3 md:px-5 py-1 md:py-1.5 text-[11px] md:text-[12px] font-bold transition-all"
-              style={{ background: "linear-gradient(135deg,oklch(0.55 0.25 15),oklch(0.62 0.23 25))", color: "white", boxShadow: "0 0 14px oklch(0.55 0.25 15 / 0.45)" }}>
+              style={{ background: "linear-gradient(135deg,oklch(0.55 0.25 280),oklch(0.45 0.25 290))", color: "white", boxShadow: "0 0 14px oklch(0.55 0.25 280 / 0.45)" }}>
               ✦ Studio
             </Link>
             <Link to="/history"
@@ -676,7 +680,7 @@ function ResultCard({ title, hint, ratio, slot, index, variantPrompt, onVariantP
       {/* Card header */}
       <div className="flex items-center justify-between px-3 py-2 border-b border-white/[0.06]">
         <div className="flex items-center gap-1.5 min-w-0">
-          <span className="grid h-5 w-5 shrink-0 place-items-center rounded-md text-[10px] font-bold" style={{background:"linear-gradient(135deg,oklch(0.55 0.25 15),oklch(0.62 0.23 25))", color:"white"}}>{index}</span>
+          <span className="grid h-5 w-5 shrink-0 place-items-center rounded-md text-[10px] font-bold" style={{background:"linear-gradient(135deg,oklch(0.55 0.25 280),oklch(0.45 0.25 290))", color:"white"}}>{index}</span>
           <span className="truncate text-[11px] font-semibold">{title}</span>
         </div>
         <StatusPill slot={slot} />

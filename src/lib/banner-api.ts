@@ -19,7 +19,7 @@ export type Ratio =
 export type Quality = "1k" | "2k" | "4k";
 
 /**
- * Coachio API constraints:
+ * Coach.io.vn API constraints:
  *  • "auto"  → only "1k"
  *  • "1:1"   → "1k" or "2k" (not "4k")
  *  • others  → "1k", "2k", "4k"
@@ -166,7 +166,7 @@ function getAuthHeaders(settings: ApiSettings): Record<string, string> {
   return { "X-API-Key": settings.apiKey };
 }
 
-// ─── Coachio API — Step 1: Upload image ──────────────────────────────────────
+// ─── Coach.io.vn API — Step 1: Upload image ──────────────────────────────────────
 
 async function uploadImage(
   dataUrl: string,
@@ -194,7 +194,7 @@ async function uploadImage(
   return json.url as string;
 }
 
-// ─── Coachio API — Step 2: Submit task ───────────────────────────────────────
+// ─── Coach.io.vn API — Step 2: Submit task ───────────────────────────────────────
 
 async function submitTask(
   p: GenerateParams,
@@ -243,7 +243,7 @@ async function submitTask(
   return json.task_id as string;
 }
 
-// ─── Coachio API — Step 3: Poll status ───────────────────────────────────────
+// ─── Coach.io.vn API — Step 3: Poll status ───────────────────────────────────────
 
 async function pollUntilDone(
   taskId: string,

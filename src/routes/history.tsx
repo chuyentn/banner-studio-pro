@@ -81,7 +81,7 @@ function HistoryPage() {
           <div className="flex items-center gap-2">
             <Link to="/" className="flex items-center gap-2 group transition-all">
               <div className="grid h-7 w-7 md:h-8 md:w-8 shrink-0 place-items-center rounded-xl transition-transform group-hover:scale-110"
-                style={{ background: "linear-gradient(135deg,oklch(0.55 0.25 15),oklch(0.62 0.23 25))", boxShadow: "0 0 16px oklch(0.55 0.25 15 / 0.4)" }}>
+                style={{ background: "linear-gradient(135deg,oklch(0.55 0.25 280),oklch(0.45 0.25 290))", boxShadow: "0 0 16px oklch(0.55 0.25 280 / 0.4)" }}>
                 <History className="h-3.5 w-3.5 md:h-4 md:w-4 text-white" />
               </div>
               <div className="hidden sm:block">
@@ -93,7 +93,7 @@ function HistoryPage() {
           <nav className="flex items-center gap-0.5 rounded-xl border border-white/[0.08] bg-white/[0.04] p-0.5 md:p-1">
             <Link to="/studio" className="rounded-lg px-3 md:px-5 py-1 md:py-1.5 text-[11px] md:text-[12px] font-medium text-muted-foreground hover:text-foreground hover:bg-white/[0.07] transition-all">✦ Studio</Link>
             <Link to="/history" className="rounded-lg px-3 md:px-5 py-1 md:py-1.5 text-[11px] md:text-[12px] font-bold transition-all"
-              style={{ background: "linear-gradient(135deg,oklch(0.55 0.25 15),oklch(0.62 0.23 25))", color: "white", boxShadow: "0 0 14px oklch(0.55 0.25 15 / 0.4)" }}>Lịch sử</Link>
+              style={{ background: "linear-gradient(135deg,oklch(0.55 0.25 280),oklch(0.45 0.25 290))", color: "white", boxShadow: "0 0 14px oklch(0.55 0.25 280 / 0.4)" }}>Lịch sử</Link>
             <Link to="/settings" className="rounded-lg px-3 md:px-5 py-1 md:py-1.5 text-[11px] md:text-[12px] font-medium text-muted-foreground hover:text-foreground hover:bg-white/[0.07] transition-all">Settings</Link>
           </nav>
           <div className="flex items-center w-10 md:w-[88px] justify-end">

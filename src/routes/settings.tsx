@@ -55,7 +55,7 @@ function Step({ n, text }: { n: number; text: React.ReactNode }) {
   return (
     <div className="flex items-start gap-2.5">
       <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-bold"
-        style={{ background: "linear-gradient(135deg,oklch(0.55 0.25 15),oklch(0.62 0.23 25))", color: "white" }}>
+        style={{ background: "linear-gradient(135deg,oklch(0.55 0.25 280),oklch(0.45 0.25 290))", color: "white" }}>
         {n}
       </span>
       <span className="text-[12px] text-foreground/80 leading-relaxed">{text}</span>
@@ -67,7 +67,7 @@ function Step({ n, text }: { n: number; text: React.ReactNode }) {
 type TabDef = { id: AuthMode; icon: React.ReactNode; label: string; subtitle: string };
 
 const TABS: TabDef[] = [
-  { id: "apikey",  icon: <KeyRound className="h-4 w-4" />,  label: "API Key",      subtitle: "Coachio AI" },
+  { id: "apikey",  icon: <KeyRound className="h-4 w-4" />,  label: "API Key",      subtitle: "Coach.io.vn" },
   { id: "bearer",  icon: <Zap className="h-4 w-4" />,       label: "Access Token", subtitle: "Google Flow" },
   { id: "cookie",  icon: <Cookie className="h-4 w-4" />,    label: "Cookies",      subtitle: "Google Flow" },
 ];
@@ -127,7 +127,7 @@ function SettingsPage() {
           <div className="flex items-center gap-2">
             <Link to="/" className="flex items-center gap-2 group transition-all">
               <div className="grid h-7 w-7 md:h-8 md:w-8 shrink-0 place-items-center rounded-xl transition-transform group-hover:scale-110"
-                style={{ background: "linear-gradient(135deg,oklch(0.55 0.25 15),oklch(0.62 0.23 25))", boxShadow: "0 0 16px oklch(0.55 0.25 15 / 0.4)" }}>
+                style={{ background: "linear-gradient(135deg,oklch(0.55 0.25 280),oklch(0.45 0.25 290))", boxShadow: "0 0 16px oklch(0.55 0.25 280 / 0.4)" }}>
                 <Settings2 className="h-3.5 w-3.5 md:h-4 md:w-4 text-white" />
               </div>
               <div className="hidden sm:block">
@@ -140,7 +140,7 @@ function SettingsPage() {
             <Link to="/studio" className="rounded-lg px-3 md:px-5 py-1 md:py-1.5 text-[11px] md:text-[12px] font-medium text-muted-foreground hover:text-foreground hover:bg-white/[0.07] transition-all">✦ Studio</Link>
             <Link to="/history" className="rounded-lg px-3 md:px-5 py-1 md:py-1.5 text-[11px] md:text-[12px] font-medium text-muted-foreground hover:text-foreground hover:bg-white/[0.07] transition-all">Lịch sử</Link>
             <Link to="/settings" className="rounded-lg px-3 md:px-5 py-1 md:py-1.5 text-[11px] md:text-[12px] font-bold transition-all"
-              style={{ background: "linear-gradient(135deg,oklch(0.55 0.25 15),oklch(0.62 0.23 25))", color: "white", boxShadow: "0 0 14px oklch(0.55 0.25 15 / 0.4)" }}>Settings</Link>
+              style={{ background: "linear-gradient(135deg,oklch(0.55 0.25 280),oklch(0.45 0.25 290))", color: "white", boxShadow: "0 0 14px oklch(0.55 0.25 280 / 0.4)" }}>Settings</Link>
           </nav>
           <div className="flex items-center w-10 md:w-[88px] justify-end">
             {user && (
@@ -238,7 +238,7 @@ function SettingsPage() {
                 }`}
                 style={active ? { background: "oklch(0.16 0.022 25 / 0.95)" } : { background: "oklch(0.14 0.013 25 / 0.85)" }}>
                 <div className={`grid h-9 w-9 place-items-center rounded-xl transition-all ${active ? "text-white" : ""}`}
-                  style={active ? { background: "linear-gradient(135deg,oklch(0.55 0.25 15),oklch(0.62 0.23 25))", boxShadow: "0 0 12px oklch(0.55 0.25 15 / 0.5)" } : { background: "rgba(255,255,255,0.06)" }}>
+                  style={active ? { background: "linear-gradient(135deg,oklch(0.55 0.25 280),oklch(0.45 0.25 290))", boxShadow: "0 0 12px oklch(0.55 0.25 15 / 0.5)" } : { background: "rgba(255,255,255,0.06)" }}>
                   {t.icon}
                 </div>
                 <div className="text-center">
@@ -255,16 +255,16 @@ function SettingsPage() {
         <div className="mt-3 rounded-2xl border border-white/[0.08] overflow-hidden"
           style={{ background: "oklch(0.15 0.014 25 / 0.9)", backdropFilter: "blur(20px)" }}>
 
-          {/* ═══ TAB 1: API KEY (Coachio) ═══════════════════════════════ */}
+          {/* ═══ TAB 1: API KEY (Coach.io.vn) ═══════════════════════════════ */}
           {mode === "apikey" && (
             <div className="p-6 space-y-5">
               <div className="flex items-center gap-3">
                 <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl"
-                  style={{ background: "linear-gradient(135deg,oklch(0.55 0.25 15),oklch(0.62 0.23 25))" }}>
+                  style={{ background: "linear-gradient(135deg,oklch(0.55 0.25 280),oklch(0.45 0.25 290))" }}>
                   <KeyRound className="h-5 w-5 text-white" />
                 </div>
                 <div>
-                  <div className="text-[14px] font-bold">Coachio API Key</div>
+                  <div className="text-[14px] font-bold">Coach.io.vn API Key</div>
                   <div className="text-[11px] text-muted-foreground">Kết nối chính thức qua X-API-Key header</div>
                 </div>
               </div>
@@ -284,7 +284,7 @@ function SettingsPage() {
                   API Key <span className="text-[9px] font-normal opacity-50">— sẽ gửi header: X-API-Key: your-key</span>
                 </label>
                 <MaskInput id="apikey-input" value={s.apiKey} onChange={(v) => setS({ ...s, apiKey: v })}
-                  placeholder="Dán Coachio API key vào đây…" />
+                  placeholder="Dán Coach.io.vn API key vào đây…" />
                 {s.apiKey && (
                   <div className="flex items-center gap-1.5 text-[10px] text-emerald-400">
                     <CheckCircle2 className="h-3 w-3" /> Đã nhập API key

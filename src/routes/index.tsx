@@ -5,12 +5,13 @@ import { Button } from "@/components/ui/button";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Banner Studio Pro — AI Banner Generator" },
+      { title: "Banner Studio — Nền tảng tạo Banner AI hàng loạt đỉnh cao" },
       {
         name: "description",
         content:
-          "Nền tảng tạo ảnh banner quảng cáo AI hàng loạt cho thương hiệu. Chuyên nghiệp, nhanh chóng và hiệu quả.",
+          "Sản xuất hàng nghìn banner quảng cáo chuyên nghiệp trong tích tắc với Banner Studio. Tự động hóa quy trình thiết kế, tối ưu chuyển đổi bằng công nghệ AI tiên tiến nhất.",
       },
+      { property: "og:url", content: "https://studio.breaths.live" },
     ],
   }),
   component: LandingPage,
@@ -18,24 +19,25 @@ export const Route = createFileRoute("/")({
 
 function LandingPage() {
   return (
-    <div className="min-h-screen bg-[#030303] text-foreground selection:bg-primary/30 overflow-x-hidden">
+    <div className="min-h-screen bg-background text-foreground selection:bg-primary/30 overflow-x-hidden font-sans">
       {/* ─── NAV ───────────────────────────────────────────────────────────── */}
-      <nav className="fixed top-0 z-[100] w-full border-b border-white/5 bg-black/60 backdrop-blur-xl">
-        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
-          <div className="flex items-center gap-2.5">
-            <div className="grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-br from-primary to-accent shadow-lg shadow-primary/20">
-              <Sparkles className="h-5 w-5 text-white" />
-            </div>
-            <span className="text-lg font-bold tracking-tight">Banner Studio <span className="text-primary text-xs ml-1 uppercase tracking-widest px-1.5 py-0.5 rounded-full bg-primary/10 border border-primary/20">Pro</span></span>
+      <nav className="fixed top-0 z-[100] w-full border-b border-white/5 bg-background/60 backdrop-blur-xl">
+        <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-6">
+          <div className="flex items-center gap-2">
+            <Link to="/" className="flex items-center gap-2.5 group">
+              <span className="text-2xl font-black tracking-tighter text-white uppercase group-hover:text-primary transition-colors">
+                Banner Studio<span className="text-primary tracking-normal ml-1">·</span>Pro
+              </span>
+            </Link>
           </div>
-          <div className="hidden md:flex items-center gap-8 text-sm font-medium text-muted-foreground">
-            <a href="#features" className="hover:text-foreground transition-colors">Tính năng</a>
-            <a href="#workflow" className="hover:text-foreground transition-colors">Quy trình</a>
-            <a href="#pricing" className="hover:text-foreground transition-colors">Bảng giá</a>
+          <div className="hidden md:flex items-center gap-10 text-[11px] font-black uppercase tracking-[0.3em] text-white/40">
+            <a href="#features" className="hover:text-white transition-colors">Tính năng</a>
+            <a href="#workflow" className="hover:text-white transition-colors">Quy trình</a>
+            <Link to="/pricing" className="hover:text-white transition-colors">Bảng giá</Link>
           </div>
           <Link to="/studio">
-            <Button variant="glow" size="sm" className="h-9 px-5 gap-2 font-bold">
-              Bắt đầu ngay <ArrowRight className="h-3.5 w-3.5" />
+            <Button variant="glow" size="lg" className="h-11 px-8 gap-2 font-black uppercase text-[11px] tracking-widest bg-primary rounded-xl shadow-lg shadow-primary/20 hover:scale-105 active:scale-95 transition-all">
+              Vào Workspace <ArrowRight className="h-4 w-4" />
             </Button>
           </Link>
         </div>
@@ -43,65 +45,62 @@ function LandingPage() {
 
       <main>
         {/* ─── HERO ──────────────────────────────────────────────────────────── */}
-        <section className="relative pt-32 pb-20 md:pt-48 md:pb-32">
-          {/* Background decoration */}
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-4xl h-[500px] bg-primary/10 blur-[120px] rounded-full pointer-events-none opacity-50" />
+        <section className="relative pt-36 pb-32 md:pt-52 md:pb-52 flex flex-col items-center overflow-hidden">
+          {/* Background decoration — Orbs */}
+          <div className="absolute top-[-15%] left-[5%] w-[800px] h-[800px] bg-primary/20 blur-[160px] rounded-full pointer-events-none opacity-40" />
+          <div className="absolute top-[20%] right-[-10%] w-[600px] h-[600px] bg-accent/10 blur-[140px] rounded-full pointer-events-none opacity-30" />
           
-          <div className="mx-auto max-w-7xl px-6 text-center">
-            <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] font-bold uppercase tracking-widest text-primary mb-8 animate-in fade-in slide-in-from-bottom-4 duration-1000">
-              <Zap className="h-3 w-3 fill-primary" /> 
-              Sức mạnh AI cho thương hiệu của bạn
+          <div className="mx-auto max-w-7xl px-6 text-center relative z-10 w-full">
+            {/* Badge */}
+            <div className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-6 py-2 text-[11px] font-black uppercase tracking-[0.25em] text-primary/90 mb-12 shadow-[0_0_30px_rgba(120,0,255,0.2)]">
+              <span>✨</span> AI BANNER GENERATOR — AUTOMATION PLATFORM
             </div>
             
-            <h1 className="text-5xl md:text-7xl lg:text-8xl font-black tracking-tighter leading-[0.9] mb-8 bg-gradient-to-b from-white via-white/90 to-white/50 bg-clip-text text-transparent animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-100">
-              TẠO BANNER QUẢNG CÁO <br className="hidden md:block" />
-              ĐẲNG CẤP VỚI AI
-            </h1>
+            <div className="hero-inner">
+              <h1 className="text-[42px] md:text-[80px] lg:text-[104px] font-black tracking-[-0.04em] leading-[1.0] md:leading-[0.92] mb-10 text-white animate-in fade-in slide-in-from-bottom-8 duration-1000">
+                Tạo banner AI <span className="shimmer-text inline-block whitespace-nowrap">hàng loạt</span>
+                <br />
+                <span className="inline-block mt-4 md:mt-2" style={{ fontSize: "0.72em", fontWeight: 800, color: "rgba(255,255,255,0.6)", letterSpacing: "-0.02em" }}>
+                  Cùng <span style={{ color: "#ffcc00", fontWeight: 900 }}>Banner Studio</span>
+                </span>
+                <br />
+                <span className="text-[0.35em] md:text-[0.28em] font-bold text-white/40 tracking-[0.1em] uppercase block mt-10 md:mt-12">
+                   Tự động hóa 100% · Không cần thiết kế · Xuất file 4K
+                </span>
+              </h1>
+            </div>
             
-            <p className="mx-auto max-w-2xl text-lg md:text-xl text-muted-foreground mb-10 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-200">
-              Biến ảnh sản phẩm thành hàng loạt banner chuyên nghiệp chỉ trong vài giây. 
-              Không cần thiết kế, không cần máy mạnh. <span className="text-foreground">AI làm tất cả cho bạn.</span>
+            <p className="mx-auto max-w-3xl text-[16px] md:text-[22px] text-white/30 font-bold tracking-tight leading-relaxed mb-16 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-200">
+              Sản xuất hàng nghìn biến thể banner chuyên nghiệp chỉ với 1 list prompt. <br className="hidden md:block" />
+              Nâng tầm thương hiệu, tối ưu chi phí và bùng nổ doanh số ngay hôm nay.
             </p>
             
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-300">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-6 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-300">
               <Link to="/studio">
-                <Button size="lg" className="h-14 px-10 text-lg font-bold gap-3 rounded-2xl shadow-2xl shadow-primary/30">
-                  <Wand2 className="h-5 w-5" /> Bắt đầu tạo ngay
+                <Button size="lg" className="h-18 px-14 text-lg font-black gap-4 rounded-[2rem] shadow-[0_20px_50px_-10px_rgba(120,0,255,0.5)] bg-primary hover:bg-primary/90 transition-all hover:scale-105 active:scale-95 uppercase tracking-[0.1em]">
+                  🚀 Bắt đầu miễn phí
                 </Button>
               </Link>
-              <Button variant="outline" size="lg" className="h-14 px-10 text-lg font-bold border-white/10 bg-white/5 hover:bg-white/10 rounded-2xl">
-                Xem demo video
+              <Button variant="ghost" size="lg" className="h-18 px-12 text-lg font-bold text-white/30 hover:text-white hover:bg-white/5 rounded-[2rem] transition-all">
+                Xem cách hoạt động →
               </Button>
-            </div>
-
-            {/* Hero Image / Mockup */}
-            <div className="mt-20 relative animate-in fade-in zoom-in duration-1500 delay-500">
-              <div className="absolute -inset-1 rounded-[2.5rem] bg-gradient-to-r from-primary/30 to-accent/30 blur opacity-20" />
-              <div className="relative rounded-[2rem] border border-white/10 bg-[#0a0a0a] p-2 md:p-4 overflow-hidden shadow-2xl">
-                 <div className="aspect-[16/9] rounded-2xl bg-gradient-to-br from-white/5 to-white/[0.02] border border-white/5 flex items-center justify-center">
-                    <div className="flex flex-col items-center gap-4 text-muted-foreground/20">
-                       <Layout className="h-16 w-16" />
-                       <span className="text-sm font-medium tracking-widest uppercase italic">AI Studio Workspace Preview</span>
-                    </div>
-                 </div>
-              </div>
             </div>
           </div>
         </section>
 
         {/* ─── STATS ────────────────────────────────────────────────────────── */}
-        <section className="py-20 border-y border-white/5 bg-white/[0.01]">
+        <section className="py-28 border-y border-white/[0.04] bg-black/40 backdrop-blur-sm">
           <div className="mx-auto max-w-7xl px-6">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-16 text-center">
               {[
-                { label: "Banners đã tạo", val: "1.2M+" },
-                { label: "Thương hiệu tin dùng", val: "500+" },
-                { label: "Tốc độ tạo", val: "< 10s" },
-                { label: "Độ phân giải", val: "4K UHD" },
+                { label: "Banners mỗi tháng", val: "1.2M+" },
+                { label: "Tỉ lệ CTR tăng", val: "45%" },
+                { label: "Thời gian thiết kế", val: "0.5s" },
+                { label: "Tiết kiệm chi phí", val: "90%" },
               ].map((s, i) => (
-                <div key={i}>
-                  <div className="text-3xl md:text-4xl font-black text-white mb-1">{s.val}</div>
-                  <div className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">{s.label}</div>
+                <div key={i} className="group cursor-default">
+                  <div className="text-5xl md:text-6xl font-black text-white mb-3 group-hover:text-primary transition-all duration-500 group-hover:scale-110">{s.val}</div>
+                  <div className="text-[11px] font-black uppercase tracking-[0.3em] text-white/20">{s.label}</div>
                 </div>
               ))}
             </div>
@@ -109,53 +108,54 @@ function LandingPage() {
         </section>
 
         {/* ─── FEATURES ──────────────────────────────────────────────────────── */}
-        <section id="features" className="py-32 relative overflow-hidden">
-          <div className="absolute right-0 top-1/4 w-96 h-96 bg-accent/5 blur-[100px] rounded-full pointer-events-none" />
+        <section id="features" className="py-40 relative overflow-hidden">
+          <div className="absolute right-[-10%] top-1/4 w-[600px] h-[600px] bg-primary/5 blur-[160px] rounded-full pointer-events-none" />
+          
           <div className="mx-auto max-w-7xl px-6">
-            <div className="text-center mb-20">
-              <h2 className="text-3xl md:text-5xl font-black tracking-tight mb-4">MẠNH MẼ VÀ THÔNG MINH</h2>
-              <p className="text-muted-foreground max-w-2xl mx-auto">Chúng tôi cung cấp mọi công cụ bạn cần để biến ý tưởng thành những chiến dịch quảng cáo triệu đô.</p>
+            <div className="text-center mb-32">
+              <h2 className="text-5xl md:text-7xl font-black tracking-tighter text-white mb-8 uppercase italic">Mạnh mẽ & Đỉnh cao</h2>
+              <p className="text-white/30 text-xl max-w-2xl mx-auto leading-relaxed font-bold tracking-tight">Giải pháp AI dẫn đầu thị trường cho Performance Marketing.</p>
             </div>
 
-            <div className="grid md:grid-cols-3 gap-6">
+            <div className="grid md:grid-cols-3 gap-10">
               {[
                 {
-                  icon: <Zap className="h-6 w-6 text-primary" />,
-                  title: "Công nghệ Coachio AI",
-                  desc: "Sử dụng model GPT Image 2 mạnh mẽ nhất từ Coachio để tạo ra những khung hình có chiều sâu và ánh sáng cinematic."
+                  icon: <Zap className="h-7 w-7 text-primary" />,
+                  title: "Sản xuất batch lớn",
+                  desc: "Xử lý hàng nghìn yêu cầu cùng lúc. Gửi prompt và nhận kết quả banner đủ mọi kích thước trong tích tắc."
                 },
                 {
-                  icon: <ShieldCheck className="h-6 w-6 text-primary" />,
-                  title: "Nhận diện thương hiệu",
-                  desc: "Chèn Logo và KOL đại sứ một cách tự nhiên với các tuỳ chỉnh vị trí, kích thước và độ mờ chuyên sâu."
+                  icon: <ShieldCheck className="h-7 w-7 text-primary" />,
+                  title: "Brand Consistency",
+                  desc: "Bảo toàn bộ nhận diện thương hiệu. Tự động chèn Logo, KOL và font chữ riêng biệt một cách hoàn hảo."
                 },
                 {
-                  icon: <Layers className="h-6 w-6 text-primary" />,
-                  title: "Sản xuất hàng loạt",
-                  desc: "Chỉ với 1 click, tạo ra hàng chục phong cách khác nhau từ Editorial cho đến Street/Lifestyle cho cùng một sản phẩm."
+                  icon: <Layers className="h-7 w-7 text-primary" />,
+                  title: "Tối ưu hóa CTR",
+                  desc: "Tạo ra vô số biến thể để A/B testing. Tìm ra mẫu banner hiệu quả nhất cho từng chiến dịch quảng cáo."
                 },
                 {
-                  icon: <ImageIcon className="h-6 w-6 text-primary" />,
+                  icon: <ImageIcon className="h-7 w-7 text-primary" />,
                   title: "Chất lượng 4K UHD",
-                  desc: "Hỗ trợ xuất file ở độ phân giải cực cao, sắc nét đến từng chi tiết, sẵn sàng cho in ấn và chạy quảng cáo Facebook/TikTok."
+                  desc: "Xuất file độ phân giải cực cao, sắc nét đến từng chi tiết, sẵn sàng cho cả digital và in ấn chuyên nghiệp."
                 },
                 {
-                  icon: <Star className="h-6 w-6 text-primary" />,
-                  title: "Style Ref Thông Minh",
-                  desc: "Học hỏi phong cách từ Pinterest hoặc các banner mẫu bạn yêu thích để tạo ra kết quả đồng bộ với brand book."
+                  icon: <Star className="h-7 w-7 text-primary" />,
+                  title: "AI Style Transfer",
+                  desc: "Học hỏi phong cách từ bất kỳ ảnh mẫu nào. AI tự động phân tích và áp dụng vibe vào sản phẩm của bạn."
                 },
                 {
-                  icon: <CheckCircle2 className="h-6 w-6 text-primary" />,
-                  title: "Quy trình đơn giản",
-                  desc: "Không cần biết Photoshop, không cần Prompt phức tạp. Mọi thao tác đều được tối ưu hóa cho người dùng không chuyên."
+                  icon: <CheckCircle2 className="h-7 w-7 text-primary" />,
+                  title: "Cloud Automation",
+                  desc: "Hệ thống vận hành 24/7 trên nền tảng đám mây. Đảm bảo tiến độ công việc luôn được duy trì ở mức cao nhất."
                 }
               ].map((f, i) => (
-                <div key={i} className="group p-8 rounded-3xl border border-white/5 bg-white/[0.02] hover:bg-white/[0.04] transition-all hover:border-primary/20">
-                  <div className="mb-6 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-white/5 group-hover:bg-primary/10 group-hover:scale-110 transition-all">
+                <div key={i} className="group p-12 rounded-[3rem] border border-white/[0.05] bg-white/[0.01] hover:bg-white/[0.03] transition-all duration-500 hover:border-primary/30 hover:shadow-2xl hover:shadow-primary/5">
+                  <div className="mb-10 inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-white/5 group-hover:bg-primary group-hover:text-white transition-all duration-500 border border-white/5 group-hover:scale-110 shadow-xl">
                     {f.icon}
                   </div>
-                  <h3 className="text-xl font-bold mb-3">{f.title}</h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed">{f.desc}</p>
+                  <h3 className="text-2xl font-black mb-5 tracking-tight text-white uppercase italic">{f.title}</h3>
+                  <p className="text-[16px] text-white/30 leading-relaxed font-bold tracking-tight">{f.desc}</p>
                 </div>
               ))}
             </div>
@@ -163,24 +163,24 @@ function LandingPage() {
         </section>
 
         {/* ─── CTA ───────────────────────────────────────────────────────────── */}
-        <section className="py-32">
-          <div className="mx-auto max-w-5xl px-6">
-            <div className="relative rounded-[3rem] overflow-hidden bg-gradient-to-br from-primary/20 to-accent/20 border border-white/10 p-12 md:p-20 text-center">
-              <div className="absolute inset-0 bg-black/40 backdrop-blur-3xl -z-10" />
-              <h2 className="text-4xl md:text-6xl font-black tracking-tight mb-6">SẴN SÀNG ĐỂ TỎA SÁNG?</h2>
-              <p className="text-lg md:text-xl text-muted-foreground mb-10 max-w-2xl mx-auto">
-                Đừng để đối thủ vượt mặt bằng những hình ảnh tầm thường. 
-                Nâng tầm thương hiệu của bạn với Banner Studio Pro ngay hôm nay.
+        <section className="py-48">
+          <div className="mx-auto max-w-6xl px-6">
+            <div className="relative rounded-[5rem] overflow-hidden bg-gradient-to-br from-primary/20 to-accent/10 border border-white/10 p-16 md:p-32 text-center shadow-2xl shadow-primary/10">
+              <div className="absolute inset-0 bg-background/80 backdrop-blur-3xl -z-10" />
+              
+              <h2 className="text-5xl md:text-8xl font-black tracking-tighter mb-10 text-white uppercase italic">Sẵn sàng để bứt phá?</h2>
+              <p className="text-xl md:text-3xl text-white/30 mb-16 max-w-3xl mx-auto font-black leading-tight tracking-tight uppercase">
+                Đừng để hình ảnh tầm thường cản bước thương hiệu của bạn.
               </p>
               <Link to="/studio">
-                <Button size="lg" className="h-16 px-12 text-xl font-bold gap-4 rounded-2xl">
-                  Bắt đầu miễn phí <ArrowRight className="h-6 w-6" />
+                <Button size="lg" className="h-20 px-16 text-2xl font-black gap-6 rounded-[2.5rem] bg-primary hover:bg-primary/90 shadow-[0_25px_60px_-10px_rgba(120,0,255,0.6)] transition-all hover:scale-105 active:scale-95 uppercase tracking-widest">
+                  🚀 Trải nghiệm ngay
                 </Button>
               </Link>
-              <div className="mt-8 flex items-center justify-center gap-4 text-xs font-medium text-muted-foreground uppercase tracking-widest">
-                <span className="flex items-center gap-1.5"><CheckCircle2 className="h-3 w-3 text-primary" /> Không cần thẻ tín dụng</span>
-                <span className="w-1 h-1 rounded-full bg-white/20" />
-                <span className="flex items-center gap-1.5"><CheckCircle2 className="h-3 w-3 text-primary" /> Hoàn trả token nếu lỗi</span>
+              <div className="mt-16 flex flex-wrap items-center justify-center gap-x-12 gap-y-6 text-[12px] font-black uppercase tracking-[0.3em] text-white/20">
+                <span className="flex items-center gap-2.5"><CheckCircle2 className="h-4 w-4 text-primary" /> Free Tokens</span>
+                <span className="flex items-center gap-2.5"><CheckCircle2 className="h-4 w-4 text-primary" /> Tiết kiệm 90% chi phí</span>
+                <span className="flex items-center gap-2.5"><CheckCircle2 className="h-4 w-4 text-primary" /> Support 24/7</span>
               </div>
             </div>
           </div>
@@ -188,46 +188,39 @@ function LandingPage() {
       </main>
 
       {/* ─── FOOTER ────────────────────────────────────────────────────────── */}
-      <footer className="py-20 border-t border-white/5 bg-black">
+      <footer className="py-32 border-t border-white/5 bg-background relative overflow-hidden">
         <div className="mx-auto max-w-7xl px-6">
-          <div className="flex flex-col md:flex-row justify-between items-start gap-10">
-            <div className="max-w-xs">
-               <div className="flex items-center gap-2.5 mb-6">
-                  <div className="grid h-8 w-8 place-items-center rounded-lg bg-primary">
-                    <Sparkles className="h-4 w-4 text-white" />
+          <div className="flex flex-col md:flex-row justify-between items-start gap-20">
+            <div className="max-w-md">
+               <div className="flex items-center gap-3 mb-10">
+                  <div className="grid h-10 w-10 place-items-center rounded-xl bg-primary">
+                    <Sparkles className="h-5 w-5 text-white" />
                   </div>
-                  <span className="text-lg font-bold tracking-tight">Banner Studio Pro</span>
+                  <span className="text-2xl font-black tracking-tighter text-white uppercase italic">Banner Studio</span>
                </div>
-               <p className="text-sm text-muted-foreground mb-6">AI phải phục vụ bạn. Không phải ngược lại. Nền tảng tạo banner quảng cáo hàng đầu Việt Nam.</p>
-               <div className="flex gap-4">
-                  <div className="h-8 w-8 rounded-full bg-white/5 hover:bg-white/10 transition-colors border border-white/5" />
-                  <div className="h-8 w-8 rounded-full bg-white/5 hover:bg-white/10 transition-colors border border-white/5" />
-                  <div className="h-8 w-8 rounded-full bg-white/5 hover:bg-white/10 transition-colors border border-white/5" />
-               </div>
+               <p className="text-base text-white/20 mb-10 leading-relaxed font-black uppercase tracking-[0.2em]">Nền tảng sản xuất Banner AI hàng loạt dẫn đầu Việt Nam.</p>
             </div>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-16">
-               <div className="flex flex-col gap-4">
-                  <span className="text-[10px] font-bold uppercase tracking-widest text-white/40">Sản phẩm</span>
-                  <a href="#" className="text-sm text-muted-foreground hover:text-primary transition-colors">Banner AI</a>
-                  <a href="#" className="text-sm text-muted-foreground hover:text-primary transition-colors">Video AI (Beta)</a>
-                  <a href="#" className="text-sm text-muted-foreground hover:text-primary transition-colors">API for Enterprise</a>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-24 gap-y-16">
+               <div className="flex flex-col gap-6">
+                  <span className="text-[12px] font-black uppercase tracking-[0.4em] text-white/10">Sản phẩm</span>
+                  <a href="#" className="text-sm text-white/30 hover:text-primary transition-colors font-black uppercase tracking-widest">Banner AI</a>
+                  <a href="#" className="text-sm text-white/30 hover:text-primary transition-colors font-black uppercase tracking-widest">Video AI</a>
+                  <Link to="/pricing" className="text-sm text-white/30 hover:text-primary transition-colors font-black uppercase tracking-widest">Bảng giá</Link>
                </div>
-               <div className="flex flex-col gap-4">
-                  <span className="text-[10px] font-bold uppercase tracking-widest text-white/40">Công ty</span>
-                  <a href="#" className="text-sm text-muted-foreground hover:text-primary transition-colors">Về chúng tôi</a>
-                  <a href="#" className="text-sm text-muted-foreground hover:text-primary transition-colors">Bảo mật</a>
-                  <a href="#" className="text-sm text-muted-foreground hover:text-primary transition-colors">Điều khoản</a>
+               <div className="flex flex-col gap-6">
+                  <span className="text-[12px] font-black uppercase tracking-[0.4em] text-white/10">Cộng đồng</span>
+                  <a href="#" className="text-sm text-white/30 hover:text-primary transition-colors font-black uppercase tracking-widest">Facebook</a>
+                  <a href="#" className="text-sm text-white/30 hover:text-primary transition-colors font-black uppercase tracking-widest">Telegram</a>
                </div>
-               <div className="flex flex-col gap-4">
-                  <span className="text-[10px] font-bold uppercase tracking-widest text-white/40">Hỗ trợ</span>
-                  <a href="#" className="text-sm text-muted-foreground hover:text-primary transition-colors">HDSD</a>
-                  <a href="#" className="text-sm text-muted-foreground hover:text-primary transition-colors">Contact</a>
-                  <a href="#" className="text-sm text-muted-foreground hover:text-primary transition-colors">Cộng đồng</a>
+               <div className="flex flex-col gap-6">
+                  <span className="text-[12px] font-black uppercase tracking-[0.4em] text-white/10">Hỗ trợ</span>
+                  <a href="#" className="text-sm text-white/30 hover:text-primary transition-colors font-black uppercase tracking-widest">Hướng dẫn</a>
+                  <a href="#" className="text-sm text-white/30 hover:text-primary transition-colors font-black uppercase tracking-widest">Liên hệ</a>
                </div>
             </div>
           </div>
-          <div className="mt-20 pt-8 border-t border-white/5 text-center">
-             <p className="text-xs text-muted-foreground">© 2026 Banner Studio Pro. Tất cả quyền được bảo lưu.</p>
+          <div className="mt-32 pt-12 border-t border-white/5 text-center">
+             <p className="text-[11px] text-white/10 font-black uppercase tracking-[0.6em]">© 2026 Banner Studio. Powered by studio.breaths.live</p>
           </div>
         </div>
       </footer>

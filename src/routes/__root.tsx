@@ -31,20 +31,21 @@ export const Route = createRootRoute({
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Banner Studio — AI banner generator" },
+      { title: "Banner Studio — AI Banner Generator" },
       {
         name: "description",
         content:
-          "Tạo banner chuyên nghiệp từ ảnh cảm hứng và ảnh sản phẩm bằng GPT Image 2 qua Coachio API.",
+          "Sản xuất hàng nghìn banner quảng cáo chuyên nghiệp trong tích tắc với Banner Studio. Tự động hóa quy trình thiết kế bằng AI.",
       },
       { name: "author", content: "Banner Studio" },
-      { property: "og:title", content: "Banner Studio — AI banner generator" },
+      { property: "og:title", content: "Banner Studio — AI Banner Generator" },
       {
         property: "og:description",
-        content: "Tạo banner sản phẩm bằng AI từ ảnh cảm hứng — 5 phong cách trong một lần.",
+        content: "Nền tảng tạo banner quảng cáo AI hàng loạt dẫn đầu Việt Nam.",
       },
       { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary" },
+      { property: "og:url", content: "https://studio.breaths.live" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
     links: [
       {

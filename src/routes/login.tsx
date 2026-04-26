@@ -163,8 +163,8 @@ function LoginPage() {
             className="mx-auto mb-4 grid h-14 w-14 place-items-center rounded-2xl"
             style={{
               background:
-                "linear-gradient(135deg,oklch(0.55 0.25 15),oklch(0.62 0.23 25))",
-              boxShadow: "0 0 40px oklch(0.55 0.25 15 / 0.5)",
+                "linear-gradient(135deg,oklch(0.55 0.25 280),oklch(0.45 0.25 290))",
+              boxShadow: "0 0 40px oklch(0.55 0.25 280 / 0.5)",
             }}
           >
             <Sparkles className="h-7 w-7 text-white" />
@@ -173,7 +173,7 @@ function LoginPage() {
             Banner Studio
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            AI Banner Generator · Coachio
+            AI Banner Generator · Coach.io.vn
           </p>
         </div>
 
@@ -304,8 +304,8 @@ function LoginPage() {
               className="w-full h-11 text-sm font-semibold gap-2"
               style={{
                 background:
-                  "linear-gradient(135deg,oklch(0.55 0.25 15),oklch(0.62 0.23 25))",
-                boxShadow: "0 0 20px oklch(0.55 0.25 15 / 0.4)",
+                  "linear-gradient(135deg,oklch(0.55 0.25 280),oklch(0.45 0.25 290))",
+                boxShadow: "0 0 20px oklch(0.55 0.25 280 / 0.4)",
               }}
             >
               {busy ? (

@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as StudioRouteImport } from './routes/studio'
 import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as HistoryRouteImport } from './routes/history'
 import { Route as IndexRouteImport } from './routes/index'
@@ -23,6 +24,11 @@ const StudioRoute = StudioRouteImport.update({
 const SettingsRoute = SettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PricingRoute = PricingRouteImport.update({
+  id: '/pricing',
+  path: '/pricing',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -45,6 +51,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/history': typeof HistoryRoute
   '/login': typeof LoginRoute
+  '/pricing': typeof PricingRoute
   '/settings': typeof SettingsRoute
   '/studio': typeof StudioRoute
 }
@@ -52,6 +59,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/history': typeof HistoryRoute
   '/login': typeof LoginRoute
+  '/pricing': typeof PricingRoute
   '/settings': typeof SettingsRoute
   '/studio': typeof StudioRoute
 }
@@ -60,21 +68,30 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/history': typeof HistoryRoute
   '/login': typeof LoginRoute
+  '/pricing': typeof PricingRoute
   '/settings': typeof SettingsRoute
   '/studio': typeof StudioRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/history' | '/login' | '/settings' | '/studio'
+  fullPaths: '/' | '/history' | '/login' | '/pricing' | '/settings' | '/studio'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/history' | '/login' | '/settings' | '/studio'
-  id: '__root__' | '/' | '/history' | '/login' | '/settings' | '/studio'
+  to: '/' | '/history' | '/login' | '/pricing' | '/settings' | '/studio'
+  id:
+    | '__root__'
+    | '/'
+    | '/history'
+    | '/login'
+    | '/pricing'
+    | '/settings'
+    | '/studio'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   HistoryRoute: typeof HistoryRoute
   LoginRoute: typeof LoginRoute
+  PricingRoute: typeof PricingRoute
   SettingsRoute: typeof SettingsRoute
   StudioRoute: typeof StudioRoute
 }
@@ -93,6 +110,13 @@ declare module '@tanstack/react-router' {
       path: '/settings'
       fullPath: '/settings'
       preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pricing': {
+      id: '/pricing'
+      path: '/pricing'
+      fullPath: '/pricing'
+      preLoaderRoute: typeof PricingRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -123,6 +147,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   HistoryRoute: HistoryRoute,
   LoginRoute: LoginRoute,
+  PricingRoute: PricingRoute,
   SettingsRoute: SettingsRoute,
   StudioRoute: StudioRoute,
 }
