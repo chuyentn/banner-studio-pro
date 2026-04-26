@@ -45,14 +45,48 @@ if (fs.existsSync(serverDir)) {
     }
   }
 
-  // 3. Create _worker.js that re-exports the server entry
-  const workerCode = `export { default } from './_server/server.js';\n`;
-  fs.writeFileSync(path.join(clientDir, '_worker.js'), workerCode);
-  console.log('✅ Created _worker.js → _server/server.js');
+  // 3. Create _worker.js that wraps the server with ASSETS fallback
+  const workerCode = `import server from './_server/server.js';
 
-  // 4. Ensure .assetsignore excludes server files from static asset serving
+export default {
+  async fetch(request, env, ctx) {
+    try {
+      // Let the SSR server handle the request first
+      const response = await server.fetch(request, env, ctx);
+      // If SSR returns a valid response, use it
+      if (response && response.status !== 404) {
+        return response;
+      }
+    } catch (e) {
+      // SSR failed, fall through to static assets
+    }
+    // Fallback: serve static assets via the ASSETS binding
+    if (env && env.ASSETS) {
+      return env.ASSETS.fetch(request);
+    }
+    return new Response('Not Found', { status: 404 });
+  }
+};
+`;
+  fs.writeFileSync(path.join(clientDir, '_worker.js'), workerCode);
+  console.log('✅ Created _worker.js with ASSETS fallback');
+
+  // 4. Create _routes.json to optimize routing
+  // Exclude static asset paths from the worker to improve performance
+  const routesConfig = {
+    version: 1,
+    include: ['/*'],
+    exclude: ['/assets/*'],
+  };
+  fs.writeFileSync(
+    path.join(clientDir, '_routes.json'),
+    JSON.stringify(routesConfig, null, 2)
+  );
+  console.log('✅ Created _routes.json');
+
+  // 5. Ensure .assetsignore excludes server files from static asset serving
   const assetsIgnorePath = path.join(clientDir, '.assetsignore');
-  const ignoreEntries = ['wrangler.json', '.dev.vars', '_worker.js', '_server'];
+  const ignoreEntries = ['wrangler.json', '.dev.vars', '_worker.js', '_server', '_routes.json'];
   fs.writeFileSync(assetsIgnorePath, ignoreEntries.join('\n') + '\n');
   console.log('✅ Updated .assetsignore');
 } else {
