@@ -1,6 +1,7 @@
 import { Outlet, Link, createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
 import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider } from "@/lib/auth-context";
+import { Home, Wand2, History as HistoryIcon, Settings as SettingsIcon } from "lucide-react";
 
 import appCss from "../styles.css?url";
 
@@ -76,7 +77,33 @@ function RootShell({ children }: { children: React.ReactNode }) {
 function RootComponent() {
   return (
     <AuthProvider>
-      <Outlet />
+      <div className="flex flex-col min-h-screen">
+        <div className="flex-1 pb-16 md:pb-0">
+          <Outlet />
+        </div>
+        
+        {/* ── MOBILE NAV ──────────────────────────────────────────────────────── */}
+        <div className="fixed bottom-0 left-0 z-[100] flex w-full md:hidden mobile-nav-blur pb-safe">
+          <div className="flex w-full items-center justify-around py-3 px-4">
+            <Link to="/" className="mobile-nav-item" activeProps={{ className: "mobile-nav-item-active" }} inactiveProps={{ className: "mobile-nav-item-inactive" }}>
+              <Home className="h-5 w-5" />
+              <span className="text-[9px] font-bold uppercase tracking-widest">Home</span>
+            </Link>
+            <Link to="/studio" className="mobile-nav-item" activeProps={{ className: "mobile-nav-item-active" }} inactiveProps={{ className: "mobile-nav-item-inactive" }}>
+              <Wand2 className="h-5 w-5" />
+              <span className="text-[9px] font-bold uppercase tracking-widest">Studio</span>
+            </Link>
+            <Link to="/history" className="mobile-nav-item" activeProps={{ className: "mobile-nav-item-active" }} inactiveProps={{ className: "mobile-nav-item-inactive" }}>
+              <HistoryIcon className="h-5 w-5" />
+              <span className="text-[9px] font-bold uppercase tracking-widest">Lịch sử</span>
+            </Link>
+            <Link to="/settings" className="mobile-nav-item" activeProps={{ className: "mobile-nav-item-active" }} inactiveProps={{ className: "mobile-nav-item-inactive" }}>
+              <SettingsIcon className="h-5 w-5" />
+              <span className="text-[9px] font-bold uppercase tracking-widest">Settings</span>
+            </Link>
+          </div>
+        </div>
+      </div>
       <Toaster />
     </AuthProvider>
   );

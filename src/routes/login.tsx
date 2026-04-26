@@ -69,7 +69,7 @@ function LoginPage() {
   // Redirect if already logged in
   useEffect(() => {
     if (!loading && user) {
-      navigate({ to: "/" });
+      navigate({ to: "/studio" });
     }
   }, [user, loading, navigate]);
 
