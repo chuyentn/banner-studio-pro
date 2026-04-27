@@ -334,7 +334,19 @@ function SettingsPage() {
                   placeholder="ya29.a0Aa7MYir… — dán từ Flow Token PRO" />
                 <div className="mt-3 space-y-1.5">
                   <label htmlFor="baseurl-bearer" className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/60">Base URL (Access Token)</label>
-                  <Input id="baseurl-bearer" value={s.baseUrlBearer} onChange={(e) => setS({ ...s, baseUrlBearer: e.target.value })}
+                  <div className="flex gap-2">
+                    <Input id="baseurl-bearer" value={s.baseUrlBearer} onChange={(e) => setS({ ...s, baseUrlBearer: e.target.value })}
+                      className="font-mono text-[10px] h-7 bg-white/[0.02] border-white/[0.05] flex-1" />
+                    <button onClick={() => setS({...s, baseUrlBearer: 'https://labs.google/fx/api'})} 
+                      className="text-[9px] px-2 py-0 h-7 rounded border border-white/10 hover:bg-white/5 text-muted-foreground whitespace-nowrap">
+                      Labs Preset
+                    </button>
+                  </div>
+                </div>
+                <div className="mt-3 space-y-1.5">
+                  <label htmlFor="projectid-bearer" className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/60">Google Project ID</label>
+                  <Input id="projectid-bearer" value={s.googleProjectId} onChange={(e) => setS({ ...s, googleProjectId: e.target.value })}
+                    placeholder="8b50d905-a87d-4fc7-..."
                     className="font-mono text-[10px] h-7 bg-white/[0.02] border-white/[0.05]" />
                 </div>
                 {s.accessToken && (
@@ -387,7 +399,19 @@ function SettingsPage() {
                 />
                 <div className="mt-3 space-y-1.5">
                   <label htmlFor="baseurl-cookie" className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/60">Base URL (Cookies)</label>
-                  <Input id="baseurl-cookie" value={s.baseUrlCookie} onChange={(e) => setS({ ...s, baseUrlCookie: e.target.value })}
+                  <div className="flex gap-2">
+                    <Input id="baseurl-cookie" value={s.baseUrlCookie} onChange={(e) => setS({ ...s, baseUrlCookie: e.target.value })}
+                      className="font-mono text-[10px] h-7 bg-white/[0.02] border-white/[0.05] flex-1" />
+                    <button onClick={() => setS({...s, baseUrlCookie: 'https://labs.google/fx/api'})} 
+                      className="text-[9px] px-2 py-0 h-7 rounded border border-white/10 hover:bg-white/5 text-muted-foreground whitespace-nowrap">
+                      Labs Preset
+                    </button>
+                  </div>
+                </div>
+                <div className="mt-3 space-y-1.5">
+                  <label htmlFor="projectid-cookie" className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/60">Google Project ID</label>
+                  <Input id="projectid-cookie" value={s.googleProjectId} onChange={(e) => setS({ ...s, googleProjectId: e.target.value })}
+                    placeholder="8b50d905-a87d-4fc7-..."
                     className="font-mono text-[10px] h-7 bg-white/[0.02] border-white/[0.05]" />
                 </div>
                 {s.cookies && (

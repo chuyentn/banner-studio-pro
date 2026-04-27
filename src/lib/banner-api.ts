@@ -154,15 +154,23 @@ function getBase(settings: ApiSettings): string {
   return settings.baseUrl.replace(/\/$/, "");
 }
 
+function isLabsUrl(url: string): boolean {
+  return url.includes("labs.google");
+}
+
 /** Returns the auth headers appropriate for the configured auth mode. */
-function getAuthHeaders(settings: ApiSettings): Record<string, string> {
+function getAuthHeaders(settings: ApiSettings, base: string): Record<string, string> {
   const h: Record<string, string> = {};
+  const isLabs = isLabsUrl(base);
 
   if (settings.authMode === "bearer" && settings.accessToken) {
     h["Authorization"] = `Bearer ${settings.accessToken}`;
-    // Redundant headers for proxies that don't look at Authorization or use custom fields
     h["token"] = settings.accessToken;
     h["X-Token"] = settings.accessToken;
+    if (isLabs) {
+      h["x-goog-ext-at"] = settings.accessToken;
+      h["x-goog-authuser"] = "0";
+    }
     if (settings.cookies) {
       h["Cookie"] = settings.cookies;
       h["X-Cookie"] = settings.cookies;
@@ -171,12 +179,15 @@ function getAuthHeaders(settings: ApiSettings): Record<string, string> {
   }
 
   if (settings.authMode === "cookie" && settings.cookies) {
-    // Browsers forbid setting the "Cookie" header in fetch. 
-    // We send X-Cookie and session as fallbacks that the proxy can read.
     h["Cookie"] = settings.cookies;
     h["X-Cookie"] = settings.cookies;
     h["session"] = settings.cookies;
-    h["X-Session"] = settings.cookies;
+    if (isLabs) {
+      h["x-goog-authuser"] = "0";
+      // Extract at token from cookies if possible, or use a placeholder
+      const atMatch = settings.cookies.match(/at=([^;]+)/);
+      if (atMatch) h["x-goog-ext-at"] = atMatch[1];
+    }
     return h;
   }
 
@@ -188,18 +199,14 @@ function getAuthHeaders(settings: ApiSettings): Record<string, string> {
 
 // ─── Coach.io.vn API — Step 1: Upload image ──────────────────────────────────────
 
-async function uploadImage(
-  dataUrl: string,
-  settings: ApiSettings,
-  base: string,
-): Promise<string> {
+async function uploadImage(dataUrl: string, settings: ApiSettings, base: string): Promise<string> {
   const { blob, ext } = dataUrlToBlob(dataUrl);
   const fd = new FormData();
   fd.append("file", blob, `image.${ext}`);
 
   const res = await fetch(`${base}/upload/image`, {
     method: "POST",
-    headers: getAuthHeaders(settings),
+    headers: getAuthHeaders(settings, base),
     body: fd,
   });
 
@@ -231,24 +238,41 @@ async function submitTask(
 ): Promise<string> {
   const base = getBase(p.settings);
   const resolution = clampQuality(p.ratio, p.quality);
+  const isLabs = isLabsUrl(base);
+  let body: any;
 
-  const body: Record<string, unknown> = {
-    task_type: "image",
-    prompt,
-    ai_model_config: {
-      model_identifier: "gpt_image_2",
-      generation_mode: "default",
-      aspect_ratio: p.ratio,
-      resolution,
-    },
-  };
-  if (imageUrls.length > 0) {
-    // Detect if these are remote URLs or data-URLs (Base64)
-    const isBase64 = imageUrls[0]?.startsWith("data:");
-    if (isBase64) {
-      body.media_inputs = { images_base64: imageUrls };
-    } else {
-      body.media_inputs = { images_url: imageUrls };
+  if (isLabs) {
+    body = {
+      prompt,
+      model_id: (p.settings as any).model || "nano_banana_2",
+      aspect_ratio: p.ratio === "1:1" ? "1:1" : p.ratio === "16:9" ? "16:9" : "9:16",
+      quantity: 1,
+      project_id: (p.settings as any).googleProjectId || "default",
+      client_context: { tool: "flow", version: "banner-studio-pro" }
+    };
+    if (imageUrls.length > 0) {
+      body.media_inputs = imageUrls[0].startsWith("data:") 
+        ? { images_base64: imageUrls } 
+        : { images_url: imageUrls };
+    }
+  } else {
+    body = {
+      task_type: "image",
+      prompt,
+      ai_model_config: {
+        model_identifier: "gpt_image_2",
+        generation_mode: "default",
+        aspect_ratio: p.ratio,
+        resolution,
+      },
+    };
+    if (imageUrls.length > 0) {
+      const isBase64 = imageUrls[0]?.startsWith("data:");
+      if (isBase64) {
+        body.media_inputs = { images_base64: imageUrls };
+      } else {
+        body.media_inputs = { images_url: imageUrls };
+      }
     }
   }
 
@@ -256,7 +280,7 @@ async function submitTask(
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      ...getAuthHeaders(p.settings),
+      ...getAuthHeaders(p.settings, base),
     },
     body: JSON.stringify(body),
   });
@@ -273,8 +297,7 @@ async function submitTask(
   }
 
   const json = await res.json();
-  if (!json.task_id) throw new Error("Submit response missing task_id.");
-  return json.task_id as string;
+  return (json.task_id || json.id) as string;
 }
 
 // ─── Coach.io.vn API — Step 3: Poll status ───────────────────────────────────────
@@ -285,20 +308,34 @@ async function pollUntilDone(
   base: string,
   maxWaitMs = 5 * 60 * 1000,
 ): Promise<string> {
-  const endpoint = `${base}/task/status/${taskId}`;
   const deadline = Date.now() + maxWaitMs;
 
   while (Date.now() < deadline) {
     await sleep(4000);
-    const res = await fetch(endpoint, { headers: getAuthHeaders(settings) });
+    const res = await fetch(`${base}/task/status/${taskId}`, { 
+        headers: getAuthHeaders(settings, base) 
+    });
     if (!res.ok) throw new Error(`Status check error ${res.status}`);
     const json = await res.json();
-    if (json.status === "completed") {
-      const url = (json.result_urls as string[] | undefined)?.[0];
-      if (!url) throw new Error("Completed task has no result URL.");
-      return url;
+
+    const isLabs = isLabsUrl(base);
+    if (isLabs) {
+      if (json.status === "completed" || json.status === "SUCCESS") {
+        const url = json.output?.images?.[0]?.url || json.result?.url;
+        if (!url) throw new Error("Labs response missing image URL.");
+        return url;
+      }
+      if (json.status === "failed" || json.status === "FAILURE") {
+        throw new Error(json.error?.message || "Labs generation failed.");
+      }
+    } else {
+      if (json.status === "completed") {
+        const url = (json.result_urls as string[] | undefined)?.[0] || json.result?.url;
+        if (!url) throw new Error("Completed task has no result URL.");
+        return url;
+      }
+      if (json.status === "failed") throw new Error(json.message || "Task failed on server.");
     }
-    if (json.status === "failed") throw new Error(json.message || "Task failed on server.");
   }
   throw new Error("Timeout: tạo banner quá 5 phút, vui lòng thử lại.");
 }

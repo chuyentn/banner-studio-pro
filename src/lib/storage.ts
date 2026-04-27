@@ -13,6 +13,7 @@ export type ApiSettings = {
   useBase64: boolean;
   baseUrlBearer: string;
   baseUrlCookie: string;
+  googleProjectId: string;
 };
 
 export const defaultApiSettings: ApiSettings = {
@@ -25,6 +26,7 @@ export const defaultApiSettings: ApiSettings = {
   useBase64: false,
   baseUrlBearer: "https://api.coachio.ai/api/v1",
   baseUrlCookie: "https://api.coachio.ai/api/v1",
+  googleProjectId: "",
 };
 
 export function loadApiSettings(): ApiSettings {
