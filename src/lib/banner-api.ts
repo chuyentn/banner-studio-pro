@@ -340,7 +340,7 @@ async function submitTask(
       }
     }
 
-    // ─── Phase 2: DALL-E 3 Generation ───────────────────────────────────
+    // ─── Phase 2: GPT Image 2 Generation ─────────────────────────────────
     const finalPrompt = visualDescription 
       ? `${prompt}\n\nVISUAL STYLE & PRODUCT DETAILS TO MATCH:\n${visualDescription}`
       : prompt;
@@ -352,7 +352,7 @@ async function submitTask(
     };
     
     body = {
-      model: p.settings.model || "dall-e-3",
+      model: p.settings.model || "gpt-image-2",
       prompt: finalPrompt,
       n: 1,
       size: openAiRatioMap[p.ratio] || "1024x1024",

@@ -106,7 +106,7 @@ function SettingsPage() {
       }
     } else {
       // Defaults for Official OpenAI
-      updates.model = "dall-e-3";
+      updates.model = "gpt-image-2";
       if (!s.baseUrl || s.baseUrl.includes("labs.google") || s.baseUrl.includes("coachio.ai")) {
         updates.baseUrl = "https://api.openai.com/v1";
       }
@@ -255,8 +255,8 @@ function SettingsPage() {
                   </div>
                 </div>
                 <div className="hidden sm:flex flex-col items-end gap-1">
-                  <span className="text-[10px] font-bold text-blue-400/80 px-2 py-0.5 rounded-full bg-blue-400/10 border border-blue-400/20">DALL-E 3 Ready</span>
-                  <span className="text-[9px] text-muted-foreground font-mono">Auto: dall-e-3</span>
+                  <span className="text-[10px] font-bold text-blue-400/80 px-2 py-0.5 rounded-full bg-blue-400/10 border border-blue-400/20">GPT Image 2 Ready</span>
+                  <span className="text-[9px] text-muted-foreground font-mono">Auto: gpt-image-2</span>
                 </div>
               </div>
 
@@ -404,7 +404,7 @@ function SettingsPage() {
               <div className="space-y-2">
                 <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest">Custom Model Name</label>
                 <Input value={s.model} onChange={(e) => setS({ ...s, model: e.target.value })}
-                  placeholder="dall-e-3 / nano_banana_2"
+                  placeholder="gpt-image-2 / nano_banana_2"
                   className="font-mono text-xs h-10 bg-white/[0.04] border-white/[0.08]" />
               </div>
               <div className="space-y-2">
@@ -455,7 +455,7 @@ function SettingsPage() {
           <AlertTriangle className="h-4 w-4 text-amber-500/60 shrink-0 mt-0.5" />
           <div className="space-y-1.5">
             <p><strong>Bảo mật:</strong> Toàn bộ Token, API Key và Cookie được lưu an toàn trong trình duyệt của bạn (Local Storage) và đồng bộ qua Firebase cá nhân.</p>
-            <p><strong>Tự động:</strong> Khi bạn chuyển tab, hệ thống sẽ tự động gán Model chuẩn (dall-e-3 cho OpenAI, nano_banana_2 cho Google Flow).</p>
+            <p><strong>Tự động:</strong> Khi bạn chuyển tab, hệ thống sẽ tự động gán Model chuẩn (gpt-image-2 cho OpenAI, nano_banana_2 cho Google Flow).</p>
           </div>
         </div>
 
