@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import {
@@ -43,6 +43,10 @@ import {
 import {
   type Quality,
   type Ratio,
+  type LogoPosition,
+  type LogoSize,
+  type KolPosition,
+  type KolFraming,
   STYLE_VARIANTS,
   generateVariants,
   regenerateOne,
@@ -55,6 +59,7 @@ import {
 } from "@/lib/banner-api";
 import { TYPO_CATEGORIES } from "@/lib/typography";
 import { useAuth } from "@/lib/auth-context";
+import { ProtectedPage } from "@/lib/require-auth";
 
 export const Route = createFileRoute("/studio")({
   head: () => ({
@@ -80,15 +85,7 @@ type SlotState =
 const MAX_VARIATIONS = STYLE_VARIANTS.length;
 
 function StudioPage() {
-  const { user, loading: authLoading, logout } = useAuth();
-  const navigate = useNavigate();
-
-  // Auth guard — redirect to login if not authenticated
-  useEffect(() => {
-    if (!authLoading && !user) {
-      navigate({ to: "/login" });
-    }
-  }, [user, authLoading, navigate]);
+  const { user, logout } = useAuth();
 
   const [settings, setSettings] = useState<ApiSettings>(loadApiSettings);
   const [inspiration, setInspiration] = useState<string[]>([]);
@@ -100,6 +97,11 @@ function StudioPage() {
   const [prompt, setPrompt] = useState("");
   const [ratio, setRatio] = useState<Ratio>("1:1");
   const [quality, setQuality] = useState<Quality>("1k");
+  const [logoPosition, setLogoPosition] = useState<LogoPosition>("top-right");
+  const [logoSize, setLogoSize] = useState<LogoSize>("small");
+  const [logoOpacity, setLogoOpacity] = useState(100);
+  const [kolPosition, setKolPosition] = useState<KolPosition>("right");
+  const [kolFraming, setKolFraming] = useState<KolFraming>("auto");
 
   // Auto-clamp quality when ratio changes (Coach.io.vn API constraints)
   const handleRatioChange = (v: string) => {
@@ -140,7 +142,14 @@ function StudioPage() {
     () => ({
       settings,
       inspirationImages: inspiration,
-      productImages: [...products, ...kolAvatar, ...brandLogo],
+      productImages: products,
+      brandLogo,
+      kolAvatar,
+      logoPosition,
+      logoSize,
+      logoOpacity,
+      kolPosition,
+      kolFraming,
       prompt,
       brand,
       productInfo,
@@ -150,7 +159,7 @@ function StudioPage() {
       variations,
       variantPrompts,
     }),
-    [settings, inspiration, products, kolAvatar, brandLogo, prompt, brand, productInfo, ratio, quality, typographyId, variations, variantPrompts],
+    [settings, inspiration, products, brandLogo, kolAvatar, logoPosition, logoSize, logoOpacity, kolPosition, kolFraming, prompt, brand, productInfo, ratio, quality, typographyId, variations, variantPrompts],
   );
 
   // Check if the ACTIVE auth mode has a credential filled in
@@ -166,11 +175,16 @@ function StudioPage() {
     return !!settings.baseUrl;
   })();
 
-  const canGenerate =
-    !running &&
-    hasAuth &&
-    hasUrl &&
-    (inspiration.length > 0 || products.length > 0);
+  const promptOnlyMode = prompt.trim().length > 0 && inspiration.length === 0 && products.length === 0;
+  const hasInput = prompt.trim().length > 0 || inspiration.length > 0 || products.length > 0;
+  const canGenerate = !running && hasAuth && hasUrl && hasInput;
+  const generateHint = !hasAuth
+    ? `Thiếu ${settings.authMode === "bearer" ? "Access Token" : settings.authMode === "cookie" ? "Cookies" : "API Key"}. Vui lòng vào Settings.`
+    : !hasUrl
+    ? "Thiếu endpoint API. Vui lòng kiểm tra Settings."
+    : !hasInput
+    ? "Upload ảnh hoặc nhập prompt để tạo banner."
+    : "";
 
   // Keyboard shortcut: Ctrl/Cmd+Enter to generate
   useEffect(() => {
@@ -195,9 +209,9 @@ function StudioPage() {
       });
       return;
     }
-    if (inspiration.length === 0 && products.length === 0) {
-      toast.error("Cần ảnh đầu vào", {
-        description: "Upload ảnh cảm hứng hoặc ảnh sản phẩm.",
+    if (prompt.trim().length === 0 && inspiration.length === 0 && products.length === 0) {
+      toast.error("Cần prompt hoặc ảnh đầu vào", {
+        description: "Nhập prompt hoặc upload ảnh để tạo banner.",
       });
       return;
     }
@@ -373,7 +387,8 @@ function StudioPage() {
   })();
 
   return (
-    <div className="studio-bg min-h-screen flex flex-col text-foreground">
+    <ProtectedPage>
+      <div className="studio-bg min-h-screen flex flex-col text-foreground">
 
       {/* ═══ FIXED HEADER ═══════════════════════════════════════════════════ */}
       <header className="sticky top-0 z-50 border-b border-white/[0.07]"
@@ -535,6 +550,95 @@ function StudioPage() {
                 density="compact"
               />
             </div>
+
+            {/* ── Logo & KOL Placement Controls ── */}
+            {(brandLogo.length > 0 || kolAvatar.length > 0) && (
+              <div className="mt-3 rounded-xl border border-white/[0.08] p-3 space-y-3" style={{ background: "oklch(0.14 0.014 25 / 0.6)" }}>
+                <span className="text-[9px] font-bold uppercase tracking-[0.18em] text-primary/80">⚙ Bố cục Logo & KOL</span>
+
+                {brandLogo.length > 0 && (
+                  <div className="space-y-2">
+                    <span className="text-[10px] font-semibold text-muted-foreground">Logo</span>
+                    <div className="grid grid-cols-3 gap-1.5">
+                      {/* Position Grid */}
+                      <div>
+                        <span className="text-[9px] text-muted-foreground/60 block mb-1">Vị trí</span>
+                        <div className="position-grid">
+                          {(() => {
+                            const GRID: { pos: LogoPosition; label: string }[] = [
+                              { pos: "top-left", label: "↖" }, { pos: "top-center", label: "↑" }, { pos: "top-right", label: "↗" },
+                              { pos: "center", label: "" }, { pos: "center", label: "◉" }, { pos: "center", label: "" },
+                              { pos: "bottom-left", label: "↙" }, { pos: "bottom-center", label: "↓" }, { pos: "bottom-right", label: "↘" },
+                            ];
+                            return GRID.map((cell, i) => {
+                              if (!cell.label) return <div key={i} className="position-grid-cell" style={{ opacity: 0, pointerEvents: "none" as const }} />;
+                              return (
+                                <button key={i} type="button"
+                                  className={`position-grid-cell ${logoPosition === cell.pos ? "active" : ""}`}
+                                  onClick={() => setLogoPosition(cell.pos)}
+                                  title={cell.pos}>
+                                  {cell.label}
+                                </button>
+                              );
+                            });
+                          })()}
+                        </div>
+                      </div>
+                      {/* Size */}
+                      <div>
+                        <span className="text-[9px] text-muted-foreground/60 block mb-1">Kích thước</span>
+                        <Select value={logoSize} onValueChange={(v) => setLogoSize(v as LogoSize)}>
+                          <SelectTrigger className="h-7 text-[10px] bg-white/[0.04] border-white/[0.08]"><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="small">Nhỏ</SelectItem>
+                            <SelectItem value="medium">Vừa</SelectItem>
+                            <SelectItem value="large">Lớn</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      {/* Opacity */}
+                      <div>
+                        <span className="text-[9px] text-muted-foreground/60 block mb-1">Opacity {logoOpacity}%</span>
+                        <input type="range" min={10} max={100} step={10} value={logoOpacity}
+                          onChange={(e) => setLogoOpacity(Number(e.target.value))}
+                          className="w-full accent-[var(--primary)] h-1" />
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {kolAvatar.length > 0 && (
+                  <div className="space-y-2">
+                    <span className="text-[10px] font-semibold text-muted-foreground">KOL / Đại sứ</span>
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <span className="text-[9px] text-muted-foreground/60 block mb-1">Vị trí</span>
+                        <Select value={kolPosition} onValueChange={(v) => setKolPosition(v as KolPosition)}>
+                          <SelectTrigger className="h-7 text-[10px] bg-white/[0.04] border-white/[0.08]"><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="left">← Trái</SelectItem>
+                            <SelectItem value="center">◉ Giữa</SelectItem>
+                            <SelectItem value="right">→ Phải</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <span className="text-[9px] text-muted-foreground/60 block mb-1">Khung hình</span>
+                        <Select value={kolFraming} onValueChange={(v) => setKolFraming(v as KolFraming)}>
+                          <SelectTrigger className="h-7 text-[10px] bg-white/[0.04] border-white/[0.08]"><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="auto">Auto — AI chọn</SelectItem>
+                            <SelectItem value="full-body">Toàn thân</SelectItem>
+                            <SelectItem value="upper-body">Bán thân</SelectItem>
+                            <SelectItem value="face">Khuôn mặt</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
           {/* Col 2: Brand + Prompt */}
           <div className="space-y-1.5">
@@ -609,10 +713,22 @@ function StudioPage() {
               : <><Wand2 className="h-5 w-5" />Tạo {variations} phong cách banner</>
             }
           </button>
-          <div className="mt-1.5 flex items-center justify-center gap-4 text-[9px] text-muted-foreground">
-            <span>⌨ Ctrl+Enter</span>
-            <span>·</span>
-            <span>{doneCount}/{variations} hoàn thành</span>
+          <div className="mt-1.5 flex flex-col items-center gap-2 text-[9px] text-muted-foreground">
+            <div className="flex items-center gap-4">
+              <span>⌨ Ctrl+Enter</span>
+              <span>·</span>
+              <span>{doneCount}/{variations} hoàn thành</span>
+            </div>
+            {generateHint && (
+              <div className="text-[11px] text-muted-foreground text-center">
+                {generateHint}
+              </div>
+            )}
+            {promptOnlyMode && (
+              <div className="text-[11px] text-muted-foreground text-center">
+                Không có ảnh? Bạn vẫn có thể tạo banner chỉ với prompt nếu model hỗ trợ.
+              </div>
+            )}
           </div>
         </section>
 
@@ -658,6 +774,7 @@ function StudioPage() {
 
       </div>
     </div>
+    </ProtectedPage>
   );
 }
 

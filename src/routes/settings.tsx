@@ -14,9 +14,9 @@ import {
   type ApiSettings, type AuthMode,
 } from "@/lib/storage";
 import { verifyConnectivity } from "@/lib/banner-api";
+import { ProtectedPage } from "@/lib/require-auth";
 import { useAuth } from "@/lib/auth-context";
 import { saveUserSettings } from "@/lib/firebase";
-import { useNavigate } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/settings")({
   head: () => ({
@@ -61,15 +61,7 @@ const TABS: TabDef[] = [
 ];
 
 function SettingsPage() {
-  const { user, loading: authLoading, logout } = useAuth();
-  const navigate = useNavigate();
-
-  // Auth guard
-  useEffect(() => {
-    if (!authLoading && !user) {
-      navigate({ to: "/login" });
-    }
-  }, [user, authLoading, navigate]);
+  const { user, logout } = useAuth();
 
   const [s, setS] = useState<ApiSettings>(loadApiSettings);
   const [showAdvanced, setShowAdvanced] = useState(false);
@@ -153,7 +145,8 @@ function SettingsPage() {
   const mode = s.authMode;
 
   return (
-    <div className="studio-bg min-h-screen flex flex-col text-foreground">
+    <ProtectedPage>
+      <div className="studio-bg min-h-screen flex flex-col text-foreground">
 
       {/* Header */}
       <header className="sticky top-0 z-50 border-b border-white/[0.07]"
@@ -459,8 +452,9 @@ function SettingsPage() {
           </div>
         </div>
 
-      </div>
+        </div>
     </div>
+    </ProtectedPage>
   );
 }
 

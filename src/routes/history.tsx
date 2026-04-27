@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Trash2, Download, ImageOff, History, LogOut } from "lucide-react";
 import { toast } from "sonner";
@@ -21,6 +21,7 @@ import {
   deleteHistoryItem,
   loadHistory,
 } from "@/lib/storage";
+import { ProtectedPage } from "@/lib/require-auth";
 import { useAuth } from "@/lib/auth-context";
 
 export const Route = createFileRoute("/history")({
@@ -34,15 +35,7 @@ export const Route = createFileRoute("/history")({
 });
 
 function HistoryPage() {
-  const { user, loading: authLoading, logout } = useAuth();
-  const navigate = useNavigate();
-
-  // Auth guard
-  useEffect(() => {
-    if (!authLoading && !user) {
-      navigate({ to: "/login" });
-    }
-  }, [user, authLoading, navigate]);
+  const { user, logout } = useAuth();
 
   const [items, setItems] = useState<HistoryItem[]>([]);
 
@@ -72,7 +65,8 @@ function HistoryPage() {
   }
 
   return (
-    <div className="studio-bg min-h-screen flex flex-col text-foreground">
+    <ProtectedPage>
+      <div className="studio-bg min-h-screen flex flex-col text-foreground">
 
       {/* Header — consistent with Studio/Settings */}
       <header className="sticky top-0 z-50 border-b border-white/[0.07]"
@@ -209,5 +203,6 @@ function HistoryPage() {
         )}
       </div>
     </div>
+    </ProtectedPage>
   );
 }

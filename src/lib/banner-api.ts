@@ -116,12 +116,59 @@ export const STYLE_VARIANTS = [
   },
 ];
 
+// ─── Logo & KOL Placement Types ───────────────────────────────────────────────
+
+export type LogoPosition = "top-left" | "top-right" | "top-center"
+  | "bottom-left" | "bottom-right" | "bottom-center" | "center";
+
+export type LogoSize = "small" | "medium" | "large";
+
+export type KolPosition = "left" | "right" | "center";
+
+export type KolFraming = "full-body" | "upper-body" | "face" | "auto";
+
+const LOGO_SIZE_MAP: Record<LogoSize, string> = {
+  small:  "max 6% of banner area, subtle",
+  medium: "about 10% of banner area, visible",
+  large:  "about 15% of banner area, prominent",
+};
+
+const LOGO_POS_MAP: Record<LogoPosition, string> = {
+  "top-left": "top-left corner with comfortable margin",
+  "top-right": "top-right corner with comfortable margin",
+  "top-center": "top-center, horizontally centered",
+  "bottom-left": "bottom-left corner with comfortable margin",
+  "bottom-right": "bottom-right corner with comfortable margin",
+  "bottom-center": "bottom-center, horizontally centered",
+  "center": "center of the banner as a watermark",
+};
+
+const KOL_POS_MAP: Record<KolPosition, string> = {
+  left:   "left side of banner, occupying ~30% width",
+  right:  "right side of banner, occupying ~30% width",
+  center: "center of banner, as the focal point",
+};
+
+const KOL_FRAME_MAP: Record<KolFraming, string> = {
+  "full-body": "Full-body portrait, lifestyle pose",
+  "upper-body": "Upper body portrait, natural confident pose",
+  "face": "Close-up face shot, beauty/skincare focus",
+  "auto": "AI decides the best framing for the composition",
+};
+
 // ─── GenerateParams ───────────────────────────────────────────────────────────
 
 export type GenerateParams = {
   settings: ApiSettings;
   inspirationImages: string[];
   productImages: string[];
+  brandLogo: string[];         // ← separated from productImages
+  kolAvatar: string[];         // ← separated from productImages
+  logoPosition: LogoPosition;
+  logoSize: LogoSize;
+  logoOpacity: number;         // 0-100
+  kolPosition: KolPosition;
+  kolFraming: KolFraming;
   prompt: string;
   brand: string;
   productInfo: string;
@@ -129,7 +176,7 @@ export type GenerateParams = {
   quality: Quality;
   typographyId: string;
   variations: number;
-  variantPrompts?: string[]; // per-variant custom instructions
+  variantPrompts?: string[];
 };
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -154,6 +201,27 @@ function getBase(settings: ApiSettings): string {
   return settings.baseUrl.replace(/\/$/, "");
 }
 
+function applyCorsProxy(url: string, settings: ApiSettings): string {
+  const proxy = settings.corsProxy?.trim();
+  if (!proxy) return url;
+
+  const cleaned = proxy.replace(/\s+/g, "");
+  if (cleaned.includes("?url=")) {
+    return cleaned + encodeURIComponent(url);
+  }
+  if (cleaned.endsWith("/")) {
+    return cleaned + encodeURIComponent(url);
+  }
+  return `${cleaned}/${encodeURIComponent(url)}`;
+}
+
+function buildApiUrl(base: string, path: string, settings: ApiSettings): string {
+  if (path.startsWith("http://") || path.startsWith("https://")) {
+    return applyCorsProxy(path, settings);
+  }
+  return applyCorsProxy(`${base}${path}`, settings);
+}
+
 function isLabsUrl(url: string): boolean {
   return url.includes("labs.google");
 }
@@ -166,7 +234,7 @@ function isOpenAIUrl(url: string): boolean {
 function getAuthHeaders(settings: ApiSettings, base: string): Record<string, string> {
   const h: Record<string, string> = {};
   const isLabs = isLabsUrl(base) || settings.authMode === "bearer" || settings.authMode === "cookie";
-  const isOpenAI = isOpenAIUrl(base) || (settings.authMode === "apikey" && !base.includes("coachio.ai"));
+  const isOpenAI = isOpenAIUrl(base) || (settings.authMode === "apikey" && base.includes("openai.com"));
 
   if (settings.authMode === "bearer" && settings.accessToken) {
     h["Authorization"] = `Bearer ${settings.accessToken}`;
@@ -213,7 +281,8 @@ async function uploadImage(dataUrl: string, settings: ApiSettings, base: string)
   const fd = new FormData();
   fd.append("file", blob, `image.${ext}`);
 
-  const res = await fetch(`${base}/upload/image`, {
+  const url = buildApiUrl(base, "/upload/image", settings);
+  const res = await fetch(url, {
     method: "POST",
     headers: getAuthHeaders(settings, base),
     body: fd,
@@ -254,14 +323,14 @@ export async function verifyConnectivity(settings: ApiSettings): Promise<{ ok: b
       testUrl = `${base}/task/status/test-connection`;
     }
 
-    const res = await fetch(testUrl, {
+    const res = await fetch(applyCorsProxy(testUrl, settings), {
       method: "GET",
       headers,
     });
 
     if (res.status === 404 && !isOpenAI) {
       // If ping fails, try just the base URL to see if it's reachable
-      const rootRes = await fetch(base, { method: "GET" }).catch(() => null);
+      const rootRes = await fetch(applyCorsProxy(base, settings), { method: "GET" }).catch(() => null);
       if (rootRes) return { ok: true, message: "Endpoint reachable (Warning: Auth not fully verified on this route)" };
     }
 
@@ -298,31 +367,58 @@ async function submitTask(
   let body: any;
 
   if (isOpenAI) {
-    // ─── Phase 1: Vision Pass (Describe images for DALL-E 3) ─────────────
+    // ─── Phase 1: Vision Pass — Classify & describe images ─────────────
     let visualDescription = "";
     if (imageUrls.length > 0) {
       try {
+        // Build classified image list for the vision prompt
+        const classifiedImages: { url: string; role: string }[] = [];
+        const prodCount = Math.min(3, p.productImages.length);
+        const inspCount = Math.min(5 - prodCount, p.inspirationImages.length);
+        let idx = 0;
+        for (let i = 0; i < prodCount && idx < imageUrls.length; i++, idx++) {
+          classifiedImages.push({ url: imageUrls[idx], role: "PRODUCT" });
+        }
+        for (let i = 0; i < inspCount && idx < imageUrls.length; i++, idx++) {
+          classifiedImages.push({ url: imageUrls[idx], role: "INSPIRATION/STYLE REF" });
+        }
+        // Append brand logo if present
+        if ((p.brandLogo?.length ?? 0) > 0 && idx < imageUrls.length) {
+          classifiedImages.push({ url: imageUrls[idx], role: "BRAND LOGO (preserve exactly)" });
+          idx++;
+        }
+        // Append KOL avatar if present
+        if ((p.kolAvatar?.length ?? 0) > 0 && idx < imageUrls.length) {
+          classifiedImages.push({ url: imageUrls[idx], role: "KOL/AMBASSADOR (preserve face likeness)" });
+          idx++;
+        }
+
+        const classificationGuide = classifiedImages
+          .map((ci, i) => `- Image ${i + 1}: ${ci.role}`)
+          .join("\n");
+
         const visionBody = {
-          model: "gpt-5.5", // Latest reasoning & vision model from 2026
+          model: "gpt-5.5",
           messages: [
             {
               role: "user",
               content: [
                 { 
                   type: "text", 
-                  text: "You are a world-class luxury brand art director. Analyze these images for a 5-star premium banner. 1. Deconstruct the 'inspiration' images: Identify the sophisticated lighting (e.g., rim lighting, soft box), the expensive color grading, and the minimalist editorial composition. 2. Audit the 'product' images: Define every physical detail, label texture, and branding element with absolute precision. We need to maintain the luxury identity of this product." 
+                  text: `You are a world-class luxury brand art director. Analyze these classified images for a 5-star premium banner:\n\n${classificationGuide}\n\nFor each image:\n1. PRODUCT images: Define every physical detail, label texture, color, and branding element with precision.\n2. INSPIRATION images: Deconstruct the lighting, color grading, and editorial composition.\n3. BRAND LOGO: Describe the logo exactly — shape, colors, text. It MUST be preserved pixel-perfect.\n4. KOL/AMBASSADOR: Describe the person's appearance, pose, and expression. Their likeness MUST be preserved exactly.` 
                 },
-                ...imageUrls.map(url => ({
+                ...classifiedImages.map(ci => ({
                   type: "image_url",
-                  image_url: { url: url.startsWith("data:") ? url : url }
+                  image_url: { url: ci.url.startsWith("data:") ? ci.url : ci.url }
                 }))
               ]
             }
           ],
-          max_tokens: 500
+          max_tokens: 600
         };
 
-        const visionRes = await fetch(`${base}/chat/completions`, {
+        const visionUrl = buildApiUrl(base, "/chat/completions", p.settings);
+        const visionRes = await fetch(visionUrl, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -365,7 +461,8 @@ async function submitTask(
       response_format: "url"
     };
 
-    const res = await fetch(`${base}/images/generations`, {
+    const imageUrl = buildApiUrl(base, "/images/generations", p.settings);
+    const res = await fetch(imageUrl, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -432,7 +529,8 @@ async function submitTask(
     }
   }
 
-  const res = await fetch(`${base}/task/submit`, {
+  const submitUrl = buildApiUrl(base, "/task/submit", p.settings);
+  const res = await fetch(submitUrl, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -479,8 +577,9 @@ async function pollUntilDone(
 
   while (Date.now() < deadline) {
     await sleep(4000);
-    const res = await fetch(`${base}/task/status/${taskId}`, { 
-        headers: getAuthHeaders(settings, base) 
+    const statusUrl = buildApiUrl(base, `/task/status/${taskId}`, settings);
+    const res = await fetch(statusUrl, {
+        headers: getAuthHeaders(settings, base)
     });
     if (!res.ok) throw new Error(`Status check error ${res.status}`);
     const json = await res.json();
@@ -539,6 +638,27 @@ function buildPrompt(
   const userNotes = p.prompt?.trim() ? p.prompt.trim() : "(none)";
   const variantNote = p.variantPrompts?.[variantIdx]?.trim() || "";
 
+  // Build logo placement block
+  const hasLogo = (p.brandLogo?.length ?? 0) > 0;
+  const logoBlock = hasLogo
+    ? `\nLOGO PLACEMENT:
+- Position: ${LOGO_POS_MAP[p.logoPosition || "top-right"]}
+- Size: ${LOGO_SIZE_MAP[p.logoSize || "small"]}
+- Opacity: ${p.logoOpacity ?? 100}%
+- Style: Preserve the logo EXACTLY as provided. Clean integration, subtle drop shadow for contrast. No modification to logo design.
+- CRITICAL: The brand logo must appear in the final banner at the specified position.`
+    : "";
+
+  // Build KOL placement block
+  const hasKol = (p.kolAvatar?.length ?? 0) > 0;
+  const kolBlock = hasKol
+    ? `\nKOL / BRAND AMBASSADOR:
+- Position: ${KOL_POS_MAP[p.kolPosition || "right"]}
+- Framing: ${KOL_FRAME_MAP[p.kolFraming || "auto"]}
+- Integration: The KOL/ambassador should interact naturally with the product. Position the product near the KOL for storytelling.
+- CRITICAL: Preserve the KOL's face and likeness EXACTLY. Do not alter facial features.`
+    : "";
+
   return `TASK: Create a 5-star premium commercial banner for "${brandLine}".
 SUBJECT: ${productLine}
 STYLE: "${styleName}" — ${styleHint}
@@ -551,6 +671,7 @@ ART DIRECTION:
    - ${typo}
    - Render ONLY the brand name and one powerful headline. 
    - DO NOT generate multiple lines of gibberish AI text. Keep it clean and editorial.
+${logoBlock}${kolBlock}
 
 VISUAL QUALITY:
 - Photorealistic, 8k resolution, cinematic lighting, sharp focus.
@@ -591,8 +712,7 @@ export async function generateVariants(
   const count = Math.min(Math.max(1, p.variations), STYLE_VARIANTS.length);
   const base = getBase(p.settings);
 
-  // ── Phase 1: upload images ────────────────────────────────────────────────
-  // Mark all slots as uploading
+  // ── Phase 1: upload images (products + inspiration + logo + KOL) ───────────
   for (let i = 0; i < count; i++) onProgress?.(i, "uploading", "");
 
   const productSlots = Math.min(3, p.productImages.length);
@@ -600,13 +720,14 @@ export async function generateVariants(
   const toUpload = [
     ...p.productImages.slice(0, productSlots),
     ...p.inspirationImages.slice(0, inspirationSlots),
+    ...p.brandLogo.slice(0, 1),    // max 1 logo
+    ...p.kolAvatar.slice(0, 1),    // max 1 KOL
   ];
 
   let uploadedUrls: string[] = [];
   const isOpenAI = isOpenAIUrl(base);
 
   if (p.settings.useBase64 || isOpenAI) {
-    // Bypass upload for Base64 mode or OpenAI (OpenAI is text-to-image)
     uploadedUrls = toUpload;
   } else {
     try {
@@ -660,6 +781,8 @@ export async function regenerateOne(
   const toUpload = [
     ...p.productImages.slice(0, productSlots),
     ...p.inspirationImages.slice(0, inspirationSlots),
+    ...p.brandLogo.slice(0, 1),
+    ...p.kolAvatar.slice(0, 1),
   ];
 
   let uploadedUrls: string[] = [];
