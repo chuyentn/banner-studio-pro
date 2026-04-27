@@ -310,7 +310,7 @@ async function submitTask(
               content: [
                 { 
                   type: "text", 
-                  text: "You are a senior art director. Analyze these images for a high-end banner ad. 1. Extract the color palette, lighting style, and layout composition from the 'inspiration' images. 2. Define the exact physical details, labeling, and branding of the 'product' in the product images. Be extremely descriptive so another AI can recreate it perfectly." 
+                  text: "You are a world-class luxury brand art director. Analyze these images for a 5-star premium banner. 1. Deconstruct the 'inspiration' images: Identify the sophisticated lighting (e.g., rim lighting, soft box), the expensive color grading, and the minimalist editorial composition. 2. Audit the 'product' images: Define every physical detail, label texture, and branding element with absolute precision. We need to maintain the luxury identity of this product." 
                 },
                 ...imageUrls.map(url => ({
                   type: "image_url",
@@ -356,6 +356,8 @@ async function submitTask(
       prompt: finalPrompt,
       n: 1,
       size: openAiRatioMap[p.ratio] || "1024x1024",
+      quality: "hd", // Force HD for 5-star quality
+      style: "vivid", // Richer colors and more "commercial" feel
       response_format: "url"
     };
 
@@ -533,22 +535,27 @@ function buildPrompt(
   const userNotes = p.prompt?.trim() ? p.prompt.trim() : "(none)";
   const variantNote = p.variantPrompts?.[variantIdx]?.trim() || "";
 
-  return `TASK: Create a professional commercial banner for "${brandLine}".
-PRODUCT: ${productLine}
+  return `TASK: Create a 5-star premium commercial banner for "${brandLine}".
+SUBJECT: ${productLine}
 STYLE: "${styleName}" — ${styleHint}
 
-VISUAL GUIDELINES:
-1. Product Hero: The product from references is the central hero. Preserve shape, label, and texture perfectly.
-2. Inspiration Mood: Match the aesthetic, lighting, and palette of the inspiration references.
-3. Composition: Clean, high-end editorial layout.
+ART DIRECTION:
+1. Product Hero: High-end editorial photography. The product is the central focus with razor-sharp details, premium textures, and realistic studio lighting.
+2. Aesthetic: Match the inspiration's mood, depth of field, and sophisticated color grading.
+3. Layout: Clean, minimalist, and expensive-looking. Professional negative space.
 4. Typography:
    - ${typo}
-   - Clear, readable, and premium placement.
+   - Render ONLY the brand name and one powerful headline. 
+   - DO NOT generate multiple lines of gibberish AI text. Keep it clean and editorial.
+
+VISUAL QUALITY:
+- Photorealistic, 8k resolution, cinematic lighting, sharp focus.
+- No blurry edges, no AI artifacts, no cluttered backgrounds.
 
 USER CONTEXT: ${userNotes}
 ${variantNote ? `VARIANT SPECIAL: ${variantNote}\n` : ""}${extraInstruction ? `ADJUSTMENT: ${extraInstruction}\n` : ""}
 
-FINAL OUTPUT: A single, print-quality banner image. No collages. No UI elements.`;
+FINAL OUTPUT: A single, world-class marketing banner image.`;
 }
 
 // ─── Core generation ──────────────────────────────────────────────────────────
