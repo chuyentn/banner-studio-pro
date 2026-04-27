@@ -511,8 +511,10 @@ export async function generateVariants(
   ];
 
   let uploadedUrls: string[] = [];
-  if (p.settings.useBase64) {
-    // Bypass upload, use direct base64
+  const isOpenAI = isOpenAIUrl(base);
+
+  if (p.settings.useBase64 || isOpenAI) {
+    // Bypass upload for Base64 mode or OpenAI (OpenAI is text-to-image)
     uploadedUrls = toUpload;
   } else {
     try {
@@ -569,7 +571,9 @@ export async function regenerateOne(
   ];
 
   let uploadedUrls: string[] = [];
-  if (p.settings.useBase64) {
+  const isOpenAI = isOpenAIUrl(base);
+
+  if (p.settings.useBase64 || isOpenAI) {
     uploadedUrls = toUpload;
   } else {
     uploadedUrls = await Promise.all(
