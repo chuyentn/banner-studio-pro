@@ -161,7 +161,7 @@ function isLabsUrl(url: string): boolean {
 /** Returns the auth headers appropriate for the configured auth mode. */
 function getAuthHeaders(settings: ApiSettings, base: string): Record<string, string> {
   const h: Record<string, string> = {};
-  const isLabs = isLabsUrl(base);
+  const isLabs = isLabsUrl(base) || settings.authMode === "bearer" || settings.authMode === "cookie";
 
   if (settings.authMode === "bearer" && settings.accessToken) {
     h["Authorization"] = `Bearer ${settings.accessToken}`;
@@ -238,20 +238,32 @@ async function submitTask(
 ): Promise<string> {
   const base = getBase(p.settings);
   const resolution = clampQuality(p.ratio, p.quality);
-  const isLabs = isLabsUrl(base);
+  const isLabs = isLabsUrl(base) || p.settings.authMode === "bearer" || p.settings.authMode === "cookie";
   let body: any;
 
   if (isLabs) {
+    // Mapping for Labs Flow ratios
+    const labsRatioMap: Record<string, string> = {
+      "1:1": "1:1",
+      "16:9": "16:9",
+      "9:16": "9:16",
+      "4:3": "4:3",
+      "3:4": "3:4",
+      "auto": "1:1",
+    };
+    
     body = {
       prompt,
-      model_id: (p.settings as any).model || "nano_banana_2",
-      aspect_ratio: p.ratio === "1:1" ? "1:1" : p.ratio === "16:9" ? "16:9" : "9:16",
+      model_id: p.settings.model || "nano_banana_2",
+      aspect_ratio: labsRatioMap[p.ratio] || "1:1",
       quantity: 1,
-      project_id: (p.settings as any).googleProjectId || "default",
+      project_id: p.settings.googleProjectId || "default",
       client_context: { tool: "flow", version: "banner-studio-pro" }
     };
     if (imageUrls.length > 0) {
-      body.media_inputs = imageUrls[0].startsWith("data:") 
+      const isBase64 = imageUrls[0]?.startsWith("data:");
+      // Labs Flow often expects media_input (singular) or images_url (plural)
+      body.media_inputs = isBase64 
         ? { images_base64: imageUrls } 
         : { images_url: imageUrls };
     }
@@ -260,7 +272,7 @@ async function submitTask(
       task_type: "image",
       prompt,
       ai_model_config: {
-        model_identifier: "gpt_image_2",
+        model_identifier: p.settings.model || "gpt_image_2",
         generation_mode: "default",
         aspect_ratio: p.ratio,
         resolution,
@@ -289,7 +301,13 @@ async function submitTask(
     let msg = `Submit error ${res.status}`;
     try {
       const j = await res.json();
-      msg = j?.message || j?.error?.message || msg;
+      // Enhanced error extraction
+      msg = j?.message || j?.error?.message || j?.detail || (typeof j === 'string' ? j : JSON.stringify(j)) || msg;
+      
+      // If j.detail is an array (FastAPI validation error), format it nicely
+      if (Array.isArray(j?.detail)) {
+        msg = (j.detail as any[]).map((d: any) => `${d.loc?.join('.')}: ${d.msg}`).join("; ");
+      }
     } catch {
       /* noop */
     }
@@ -318,7 +336,7 @@ async function pollUntilDone(
     if (!res.ok) throw new Error(`Status check error ${res.status}`);
     const json = await res.json();
 
-    const isLabs = isLabsUrl(base);
+    const isLabs = isLabsUrl(base) || settings.authMode === "bearer" || settings.authMode === "cookie";
     if (isLabs) {
       if (json.status === "completed" || json.status === "SUCCESS") {
         const url = json.output?.images?.[0]?.url || json.result?.url;
