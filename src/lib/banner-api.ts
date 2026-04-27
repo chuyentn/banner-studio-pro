@@ -238,6 +238,52 @@ async function uploadImage(dataUrl: string, settings: ApiSettings, base: string)
   return (json.url || json.data?.url) as string;
 }
 
+// ─── Connectivity Audit — Verify if API works ────────────────────────────────────
+
+export async function verifyConnectivity(settings: ApiSettings): Promise<{ ok: boolean; message: string }> {
+  const base = getBase(settings);
+  const headers = getAuthHeaders(settings, base);
+  const isOpenAI = isOpenAIUrl(base);
+  
+  try {
+    // Determine test endpoint
+    let testUrl = `${base}/task/status/ping`; // Coachio default
+    if (isOpenAI) {
+      testUrl = `${base}/models`;
+    } else if (isLabsUrl(base)) {
+      testUrl = `${base}/task/status/test-connection`;
+    }
+
+    const res = await fetch(testUrl, {
+      method: "GET",
+      headers,
+    });
+
+    if (res.status === 404 && !isOpenAI) {
+      // If ping fails, try just the base URL to see if it's reachable
+      const rootRes = await fetch(base, { method: "GET" }).catch(() => null);
+      if (rootRes) return { ok: true, message: "Endpoint reachable (Warning: Auth not fully verified on this route)" };
+    }
+
+    if (res.ok) return { ok: true, message: "Kết nối thành công!" };
+    
+    if (res.status === 401 || res.status === 403) {
+      return { ok: false, message: "Lỗi xác thực: Sai API Key / Token / Cookie." };
+    }
+
+    return { ok: false, message: `Lỗi kết nối: Server trả về mã ${res.status}.` };
+  } catch (e) {
+    const isNetworkError = e instanceof TypeError && e.message === "Failed to fetch";
+    if (isNetworkError) {
+      return { 
+        ok: false, 
+        message: "Lỗi mạng hoặc CORS: Không thể kết nối tới server. Kiểm tra lại Endpoint hoặc bật Proxy." 
+      };
+    }
+    return { ok: false, message: e instanceof Error ? e.message : "Không thể kết nối tới API." };
+  }
+}
+
 // ─── Coach.io.vn API — Step 2: Submit task ───────────────────────────────────────
 
 async function submitTask(

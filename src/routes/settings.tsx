@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import {
   KeyRound, Zap, Cookie, Eye, EyeOff, Save, RotateCcw,
-  CheckCircle2, Settings2, LogOut, AlertTriangle, ShieldCheck
+  CheckCircle2, Settings2, LogOut, AlertTriangle, ShieldCheck, Loader2
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -13,6 +13,7 @@ import {
   defaultApiSettings, loadApiSettings, saveApiSettings,
   type ApiSettings, type AuthMode,
 } from "@/lib/storage";
+import { verifyConnectivity } from "@/lib/banner-api";
 import { useAuth } from "@/lib/auth-context";
 import { saveUserSettings } from "@/lib/firebase";
 import { useNavigate } from "@tanstack/react-router";
@@ -72,6 +73,23 @@ function SettingsPage() {
 
   const [s, setS] = useState<ApiSettings>(loadApiSettings);
   const [showAdvanced, setShowAdvanced] = useState(false);
+  const [testing, setTesting] = useState(false);
+  const [testResult, setTestResult] = useState<{ ok: boolean; message: string } | null>(null);
+
+  async function testConnection() {
+    setTesting(true);
+    setTestResult(null);
+    try {
+      const res = await verifyConnectivity(s);
+      setTestResult(res);
+      if (res.ok) toast.success(res.message);
+      else toast.error("Kết nối thất bại", { description: res.message });
+    } catch (e) {
+      setTestResult({ ok: false, message: "Lỗi không xác định" });
+    } finally {
+      setTesting(false);
+    }
+  }
 
   // Helper to switch modes with intelligent defaults
   function switchMode(newMode: AuthMode) {
@@ -405,10 +423,32 @@ function SettingsPage() {
             className="w-full sm:w-auto btn-generate flex items-center justify-center gap-2.5 rounded-2xl px-10 py-3.5 text-[15px] font-bold text-white shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all">
             <Save className="h-5 w-5" /> Lưu cấu hình & Sẵn sàng
           </button>
+          
+          <Button 
+            variant="outline" 
+            onClick={testConnection} 
+            disabled={testing}
+            className="w-full sm:w-auto gap-2 text-[14px] h-12 px-8 border-primary/20 bg-primary/5 hover:bg-primary/10 rounded-2xl transition-all"
+          >
+            {testing ? <Loader2 className="h-4 w-4 animate-spin" /> : <ShieldCheck className="h-4 w-4" />}
+            Kiểm tra kết nối
+          </Button>
+
           <Button variant="ghost" onClick={reset} className="w-full sm:w-auto gap-2 text-[14px] h-12 px-8 border border-white/5 hover:bg-white/5 rounded-2xl">
-            <RotateCcw className="h-4 w-4" /> Reset mặc định
+            <RotateCcw className="h-4 w-4" /> Reset
           </Button>
         </div>
+
+        {testResult && (
+          <div className={`mt-4 rounded-2xl border p-4 animate-in fade-in slide-in-from-top-2 duration-300 ${
+            testResult.ok ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400" : "border-destructive/30 bg-destructive/10 text-destructive-foreground"
+          }`}>
+            <div className="flex items-center gap-3 text-[13px]">
+              {testResult.ok ? <CheckCircle2 className="h-5 w-5" /> : <AlertTriangle className="h-5 w-5" />}
+              <span className="font-bold">{testResult.message}</span>
+            </div>
+          </div>
+        )}
 
         {/* Security and help note */}
         <div className="mt-8 flex items-start gap-3 rounded-2xl border border-white/[0.06] bg-white/[0.02] p-5 text-[11px] text-muted-foreground leading-relaxed italic shadow-inner">

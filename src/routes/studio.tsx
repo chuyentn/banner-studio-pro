@@ -157,13 +157,19 @@ function StudioPage() {
   const hasAuth = (() => {
     if (settings.authMode === "bearer") return !!settings.accessToken;
     if (settings.authMode === "cookie") return !!settings.cookies;
-    return !!settings.apiKey; // default: apikey
+    return !!settings.apiKey;
+  })();
+
+  const hasUrl = (() => {
+    if (settings.authMode === "bearer") return !!settings.baseUrlBearer;
+    if (settings.authMode === "cookie") return !!settings.baseUrlCookie;
+    return !!settings.baseUrl;
   })();
 
   const canGenerate =
     !running &&
     hasAuth &&
-    !!settings.baseUrl &&
+    hasUrl &&
     (inspiration.length > 0 || products.length > 0);
 
   // Keyboard shortcut: Ctrl/Cmd+Enter to generate
