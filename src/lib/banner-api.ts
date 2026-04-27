@@ -349,6 +349,10 @@ async function submitTask(
       "1:1": "1024x1024",
       "16:9": "1792x1024",
       "9:16": "1024x1792",
+      "4:5": "1024x1792",  // Closest to tall
+      "3:4": "1024x1792",  // Closest to tall
+      "4:3": "1792x1024",  // Closest to wide
+      "3:2": "1792x1024",  // Closest to wide
     };
     
     body = {
@@ -356,8 +360,8 @@ async function submitTask(
       prompt: finalPrompt,
       n: 1,
       size: openAiRatioMap[p.ratio] || "1024x1024",
-      quality: "hd", // Force HD for 5-star quality
-      style: "vivid", // Richer colors and more "commercial" feel
+      quality: (p.quality === "2k" || p.quality === "4k") ? "hd" : "standard",
+      style: "vivid", 
       response_format: "url"
     };
 
