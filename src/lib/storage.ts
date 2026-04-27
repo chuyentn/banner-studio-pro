@@ -20,7 +20,7 @@ export type ApiSettings = {
 export const defaultApiSettings: ApiSettings = {
   apiKey: "",
   baseUrl: "https://api.openai.com/v1",
-  model: "dall-e-3",
+  model: "gpt-image-2",
   authMode: "apikey",
   accessToken: "",
   cookies: "",

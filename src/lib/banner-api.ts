@@ -292,23 +292,68 @@ async function submitTask(
   prompt: string,
 ): Promise<string> {
   const base = getBase(p.settings);
-  const resolution = clampQuality(p.ratio, p.quality);
-  const isLabs = isLabsUrl(base) || p.settings.authMode === "bearer" || p.settings.authMode === "cookie";
   const isOpenAI = isOpenAIUrl(base);
+  const isLabs = isLabsUrl(base) || p.settings.authMode === "bearer" || p.settings.authMode === "cookie";
+  const resolution = clampQuality(p.ratio, p.quality);
   let body: any;
 
   if (isOpenAI) {
-    // Official OpenAI DALL-E 3 logic
+    // ─── Phase 1: Vision Pass (Describe images for DALL-E 3) ─────────────
+    let visualDescription = "";
+    if (imageUrls.length > 0) {
+      try {
+        const visionBody = {
+          model: "gpt-5.5", // Latest reasoning & vision model from 2026
+          messages: [
+            {
+              role: "user",
+              content: [
+                { 
+                  type: "text", 
+                  text: "You are a senior art director. Analyze these images for a high-end banner ad. 1. Extract the color palette, lighting style, and layout composition from the 'inspiration' images. 2. Define the exact physical details, labeling, and branding of the 'product' in the product images. Be extremely descriptive so another AI can recreate it perfectly." 
+                },
+                ...imageUrls.map(url => ({
+                  type: "image_url",
+                  image_url: { url: url.startsWith("data:") ? url : url }
+                }))
+              ]
+            }
+          ],
+          max_tokens: 500
+        };
+
+        const visionRes = await fetch(`${base}/chat/completions`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            ...getAuthHeaders(p.settings, base),
+          },
+          body: JSON.stringify(visionBody),
+        });
+
+        if (visionRes.ok) {
+          const visionJson = await visionRes.json();
+          visualDescription = visionJson.choices?.[0]?.message?.content || "";
+        }
+      } catch (e) {
+        console.warn("Vision pass failed", e);
+      }
+    }
+
+    // ─── Phase 2: DALL-E 3 Generation ───────────────────────────────────
+    const finalPrompt = visualDescription 
+      ? `${prompt}\n\nVISUAL STYLE & PRODUCT DETAILS TO MATCH:\n${visualDescription}`
+      : prompt;
+
     const openAiRatioMap: Record<string, string> = {
       "1:1": "1024x1024",
       "16:9": "1792x1024",
       "9:16": "1024x1792",
-      "4:3": "1024x1024", // DALL-E 3 fallback
     };
     
     body = {
       model: p.settings.model || "dall-e-3",
-      prompt,
+      prompt: finalPrompt,
       n: 1,
       size: openAiRatioMap[p.ratio] || "1024x1024",
       response_format: "url"
@@ -488,32 +533,22 @@ function buildPrompt(
   const userNotes = p.prompt?.trim() ? p.prompt.trim() : "(none)";
   const variantNote = p.variantPrompts?.[variantIdx]?.trim() || "";
 
-  return `You are an expert art director creating a polished, finished marketing banner / poster.
+  return `TASK: Create a professional commercial banner for "${brandLine}".
+PRODUCT: ${productLine}
+STYLE: "${styleName}" — ${styleHint}
 
-BRAND: ${brandLine}
-PRODUCT INFO: ${productLine}
-ASPECT RATIO: ${p.ratio}
-TARGET QUALITY: ${p.quality.toUpperCase()} resolution, print ready.
+VISUAL GUIDELINES:
+1. Product Hero: The product from references is the central hero. Preserve shape, label, and texture perfectly.
+2. Inspiration Mood: Match the aesthetic, lighting, and palette of the inspiration references.
+3. Composition: Clean, high-end editorial layout.
+4. Typography:
+   - ${typo}
+   - Clear, readable, and premium placement.
 
-INPUT USAGE RULES (very important):
-- The FIRST set of reference images is for INSPIRATION ONLY. Learn from their composition, color palette, lighting, mood, layout system, and typography style.
-- DO NOT copy any logos, brand marks, watermarks, model faces, or proprietary text from the inspiration images. Treat them as pure mood/style references.
-- The SECOND set of images is the ACTUAL PRODUCT. Preserve its exact shape, label, color, and physical details — do not invent a different product.
-- Compose a NEW banner where the user's product is the hero, styled in the spirit of the inspiration.
-- If the user provided no brand, no product info, and no notes, simply learn the visual style from the inspiration and produce a beautiful banner for the product shown.
+USER CONTEXT: ${userNotes}
+${variantNote ? `VARIANT SPECIAL: ${variantNote}\n` : ""}${extraInstruction ? `ADJUSTMENT: ${extraInstruction}\n` : ""}
 
-CONTENT (curated, not stuffed):
-- Craft a short, punchy HEADLINE (max ~5 words) and an optional TAGLINE (max ~8 words). Be selective — pick the most compelling angle.
-- If a brand name is provided, place it tastefully (small wordmark, not dominant).
-- All text must be perfectly legible, well-kerned, and free of typos.
-
-${typo}
-
-STYLE VARIANT — ${styleName}: ${styleHint}
-
-GLOBAL USER NOTES: ${userNotes}
-${variantNote ? `\nVARIATION-SPECIFIC INSTRUCTION (highest priority for this variant):\n${variantNote}\n` : ""}${extraInstruction ? `\nREGENERATE ADJUSTMENT:\n${extraInstruction}\n` : ""}
-The output must be a single polished banner image — not a collage, not a moodboard, not annotated.`;
+FINAL OUTPUT: A single, print-quality banner image. No collages. No UI elements.`;
 }
 
 // ─── Core generation ──────────────────────────────────────────────────────────
