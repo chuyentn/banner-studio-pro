@@ -149,21 +149,41 @@ function dataUrlToBlob(dataUrl: string): { blob: Blob; ext: string } {
 }
 
 function getBase(settings: ApiSettings): string {
+  if (settings.authMode === "bearer") return (settings.baseUrlBearer || settings.baseUrl).replace(/\/$/, "");
+  if (settings.authMode === "cookie") return (settings.baseUrlCookie || settings.baseUrl).replace(/\/$/, "");
   return settings.baseUrl.replace(/\/$/, "");
 }
 
 /** Returns the auth headers appropriate for the configured auth mode. */
 function getAuthHeaders(settings: ApiSettings): Record<string, string> {
+  const h: Record<string, string> = {};
+
   if (settings.authMode === "bearer" && settings.accessToken) {
-    const h: Record<string, string> = { Authorization: `Bearer ${settings.accessToken}` };
-    if (settings.cookies) h["Cookie"] = settings.cookies;
+    h["Authorization"] = `Bearer ${settings.accessToken}`;
+    // Redundant headers for proxies that don't look at Authorization or use custom fields
+    h["token"] = settings.accessToken;
+    h["X-Token"] = settings.accessToken;
+    if (settings.cookies) {
+      h["Cookie"] = settings.cookies;
+      h["X-Cookie"] = settings.cookies;
+    }
     return h;
   }
+
   if (settings.authMode === "cookie" && settings.cookies) {
-    return { Cookie: settings.cookies };
+    // Browsers forbid setting the "Cookie" header in fetch. 
+    // We send X-Cookie and session as fallbacks that the proxy can read.
+    h["Cookie"] = settings.cookies;
+    h["X-Cookie"] = settings.cookies;
+    h["session"] = settings.cookies;
+    h["X-Session"] = settings.cookies;
+    return h;
   }
+
   // Default: apikey
-  return { "X-API-Key": settings.apiKey };
+  h["X-API-Key"] = settings.apiKey;
+  h["api-key"] = settings.apiKey; // kebab-case fallback
+  return h;
 }
 
 // ─── Coach.io.vn API — Step 1: Upload image ──────────────────────────────────────
@@ -185,13 +205,21 @@ async function uploadImage(
 
   if (!res.ok) {
     let msg = `Upload error ${res.status}`;
-    try { msg = (await res.json())?.message || msg; } catch { /* noop */ }
+    try {
+      const text = await res.text();
+      try {
+        const j = JSON.parse(text);
+        msg = j.message || j.error || j.detail || msg;
+      } catch {
+        msg = text.slice(0, 200) || msg;
+      }
+    } catch { /* noop */ }
     throw new Error(msg);
   }
 
   const json = await res.json();
-  if (!json.url) throw new Error("Upload response missing URL.");
-  return json.url as string;
+  if (!json.url && !json.data?.url) throw new Error("Upload response missing URL.");
+  return (json.url || json.data?.url) as string;
 }
 
 // ─── Coach.io.vn API — Step 2: Submit task ───────────────────────────────────────
@@ -215,7 +243,13 @@ async function submitTask(
     },
   };
   if (imageUrls.length > 0) {
-    body.media_inputs = { images_url: imageUrls };
+    // Detect if these are remote URLs or data-URLs (Base64)
+    const isBase64 = imageUrls[0]?.startsWith("data:");
+    if (isBase64) {
+      body.media_inputs = { images_base64: imageUrls };
+    } else {
+      body.media_inputs = { images_url: imageUrls };
+    }
   }
 
   const res = await fetch(`${base}/task/submit`, {
@@ -370,17 +404,22 @@ export async function generateVariants(
   ];
 
   let uploadedUrls: string[] = [];
-  try {
-    uploadedUrls = await Promise.all(
-      toUpload.map((d) => uploadImage(d, p.settings, base)),
-    );
-  } catch (e) {
-    const msg = e instanceof Error ? e.message : "Upload thất bại";
-    for (let i = 0; i < count; i++) onProgress?.(i, "error", msg);
-    return {
-      results: Array(count).fill(null),
-      errors: Array(count).fill(msg),
-    };
+  if (p.settings.useBase64) {
+    // Bypass upload, use direct base64
+    uploadedUrls = toUpload;
+  } else {
+    try {
+      uploadedUrls = await Promise.all(
+        toUpload.map((d) => uploadImage(d, p.settings, base)),
+      );
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "Upload thất bại";
+      for (let i = 0; i < count; i++) onProgress?.(i, "error", msg);
+      return {
+        results: Array(count).fill(null),
+        errors: Array(count).fill(msg),
+      };
+    }
   }
 
   // ── Phase 2: submit + poll all variants in parallel ───────────────────────
@@ -422,9 +461,14 @@ export async function regenerateOne(
     ...p.inspirationImages.slice(0, inspirationSlots),
   ];
 
-  const uploadedUrls = await Promise.all(
-    toUpload.map((d) => uploadImage(d, p.settings, base)),
-  );
+  let uploadedUrls: string[] = [];
+  if (p.settings.useBase64) {
+    uploadedUrls = toUpload;
+  } else {
+    uploadedUrls = await Promise.all(
+      toUpload.map((d) => uploadImage(d, p.settings, base)),
+    );
+  }
 
   const taskId = await submitTask(p, uploadedUrls, prompt);
   return pollUntilDone(taskId, p.settings, base);

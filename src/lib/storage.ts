@@ -10,6 +10,9 @@ export type ApiSettings = {
   authMode: AuthMode;
   accessToken: string;
   cookies: string;
+  useBase64: boolean;
+  baseUrlBearer: string;
+  baseUrlCookie: string;
 };
 
 export const defaultApiSettings: ApiSettings = {
@@ -19,6 +22,9 @@ export const defaultApiSettings: ApiSettings = {
   authMode: "apikey",
   accessToken: "",
   cookies: "",
+  useBase64: false,
+  baseUrlBearer: "https://api.coachio.ai/api/v1",
+  baseUrlCookie: "https://api.coachio.ai/api/v1",
 };
 
 export function loadApiSettings(): ApiSettings {

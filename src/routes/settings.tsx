@@ -285,6 +285,11 @@ function SettingsPage() {
                 </label>
                 <MaskInput id="apikey-input" value={s.apiKey} onChange={(v) => setS({ ...s, apiKey: v })}
                   placeholder="Dán Coach.io.vn API key vào đây…" />
+                <div className="mt-3 space-y-1.5">
+                  <label htmlFor="baseurl-apikey" className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/60">Base URL (API Key)</label>
+                  <Input id="baseurl-apikey" value={s.baseUrl} onChange={(e) => setS({ ...s, baseUrl: e.target.value })}
+                    className="font-mono text-[10px] h-7 bg-white/[0.02] border-white/[0.05]" />
+                </div>
                 {s.apiKey && (
                   <div className="flex items-center gap-1.5 text-[10px] text-emerald-400">
                     <CheckCircle2 className="h-3 w-3" /> Đã nhập API key
@@ -327,6 +332,11 @@ function SettingsPage() {
                 </label>
                 <MaskInput id="token-input" value={s.accessToken} onChange={(v) => setS({ ...s, accessToken: v })}
                   placeholder="ya29.a0Aa7MYir… — dán từ Flow Token PRO" />
+                <div className="mt-3 space-y-1.5">
+                  <label htmlFor="baseurl-bearer" className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/60">Base URL (Access Token)</label>
+                  <Input id="baseurl-bearer" value={s.baseUrlBearer} onChange={(e) => setS({ ...s, baseUrlBearer: e.target.value })}
+                    className="font-mono text-[10px] h-7 bg-white/[0.02] border-white/[0.05]" />
+                </div>
                 {s.accessToken && (
                   <div className="flex items-center gap-1.5 text-[10px] text-emerald-400">
                     <CheckCircle2 className="h-3 w-3" /> Đã nhập access token
@@ -375,6 +385,11 @@ function SettingsPage() {
                   rows={4}
                   className="resize-none font-mono text-[11px] bg-white/[0.04] border-white/[0.08] placeholder:text-muted-foreground/30"
                 />
+                <div className="mt-3 space-y-1.5">
+                  <label htmlFor="baseurl-cookie" className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/60">Base URL (Cookies)</label>
+                  <Input id="baseurl-cookie" value={s.baseUrlCookie} onChange={(e) => setS({ ...s, baseUrlCookie: e.target.value })}
+                    className="font-mono text-[10px] h-7 bg-white/[0.02] border-white/[0.05]" />
+                </div>
                 {s.cookies && (
                   <div className="flex items-center gap-1.5 text-[10px] text-emerald-400">
                     <CheckCircle2 className="h-3 w-3" /> Đã nhập cookies ({s.cookies.split(";").length} mục)
@@ -399,7 +414,25 @@ function SettingsPage() {
         {showAdvanced && (
           <div className="mt-3 rounded-2xl border border-white/[0.07] p-5 space-y-4"
             style={{ background: "oklch(0.14 0.012 25 / 0.85)", backdropFilter: "blur(20px)" }}>
-            <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">⚙ Cấu hình Endpoint (Nâng cao)</div>
+            <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground flex justify-between items-center">
+              ⚙ Cấu hình nâng cao
+              <span className="text-[9px] text-primary normal-case font-medium">Cẩn thận khi thay đổi</span>
+            </div>
+            
+            <div className="flex items-center justify-between gap-4 p-3 rounded-xl bg-primary/5 border border-primary/10">
+              <div className="space-y-0.5">
+                <div className="text-[12px] font-bold text-primary">Gửi ảnh trực tiếp (Base64)</div>
+                <div className="text-[10px] text-muted-foreground">Bỏ qua bước upload ảnh, nhúng trực tiếp dữ liệu vào lệnh tạo. Dùng cho tài khoản Ultra/Bypass.</div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setS({ ...s, useBase64: !s.useBase64 })}
+                className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${s.useBase64 ? "bg-primary" : "bg-white/10"}`}
+              >
+                <span className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${s.useBase64 ? "translate-x-4" : "translate-x-0"}`} />
+              </button>
+            </div>
+
             <div className="space-y-1.5">
               <label htmlFor="baseurl-input" className="text-[11px] font-semibold text-muted-foreground">Base URL</label>
               <Input id="baseurl-input" value={s.baseUrl} onChange={(e) => setS({ ...s, baseUrl: e.target.value })}
