@@ -158,10 +158,15 @@ function isLabsUrl(url: string): boolean {
   return url.includes("labs.google");
 }
 
+function isOpenAIUrl(url: string): boolean {
+  return url.includes("api.openai.com");
+}
+
 /** Returns the auth headers appropriate for the configured auth mode. */
 function getAuthHeaders(settings: ApiSettings, base: string): Record<string, string> {
   const h: Record<string, string> = {};
   const isLabs = isLabsUrl(base) || settings.authMode === "bearer" || settings.authMode === "cookie";
+  const isOpenAI = isOpenAIUrl(base) || (settings.authMode === "apikey" && !base.includes("coachio.ai"));
 
   if (settings.authMode === "bearer" && settings.accessToken) {
     h["Authorization"] = `Bearer ${settings.accessToken}`;
@@ -192,8 +197,12 @@ function getAuthHeaders(settings: ApiSettings, base: string): Record<string, str
   }
 
   // Default: apikey
-  h["X-API-Key"] = settings.apiKey;
-  h["api-key"] = settings.apiKey; // kebab-case fallback
+  if (isOpenAI) {
+    h["Authorization"] = `Bearer ${settings.apiKey}`;
+  } else {
+    h["X-API-Key"] = settings.apiKey;
+    h["api-key"] = settings.apiKey; // kebab-case fallback
+  }
   return h;
 }
 
@@ -239,7 +248,45 @@ async function submitTask(
   const base = getBase(p.settings);
   const resolution = clampQuality(p.ratio, p.quality);
   const isLabs = isLabsUrl(base) || p.settings.authMode === "bearer" || p.settings.authMode === "cookie";
+  const isOpenAI = isOpenAIUrl(base);
   let body: any;
+
+  if (isOpenAI) {
+    // Official OpenAI DALL-E 3 logic
+    const openAiRatioMap: Record<string, string> = {
+      "1:1": "1024x1024",
+      "16:9": "1792x1024",
+      "9:16": "1024x1792",
+      "4:3": "1024x1024", // DALL-E 3 fallback
+    };
+    
+    body = {
+      model: p.settings.model || "dall-e-3",
+      prompt,
+      n: 1,
+      size: openAiRatioMap[p.ratio] || "1024x1024",
+      response_format: "url"
+    };
+
+    const res = await fetch(`${base}/images/generations`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...getAuthHeaders(p.settings, base),
+      },
+      body: JSON.stringify(body),
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ error: { message: "OpenAI API Error" } }));
+      throw new Error(err.error?.message || `OpenAI error ${res.status}`);
+    }
+
+    const json = await res.json();
+    const url = json.data?.[0]?.url;
+    if (!url) throw new Error("OpenAI response missing image URL.");
+    return `__DIRECT_URL__:${url}`;
+  }
 
   if (isLabs) {
     // Mapping for Labs Flow ratios
@@ -326,6 +373,11 @@ async function pollUntilDone(
   base: string,
   maxWaitMs = 5 * 60 * 1000,
 ): Promise<string> {
+  // Direct result handling for synchronous APIs like official OpenAI
+  if (taskId.startsWith("__DIRECT_URL__:")) {
+    return taskId.replace("__DIRECT_URL__:", "");
+  }
+
   const deadline = Date.now() + maxWaitMs;
 
   while (Date.now() < deadline) {

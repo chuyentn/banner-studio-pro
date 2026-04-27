@@ -19,14 +19,14 @@ export type ApiSettings = {
 
 export const defaultApiSettings: ApiSettings = {
   apiKey: "",
-  baseUrl: "https://api.coachio.ai/api/v1",
-  model: "gpt_image_2",
+  baseUrl: "https://api.openai.com/v1",
+  model: "dall-e-3",
   authMode: "apikey",
   accessToken: "",
   cookies: "",
   useBase64: false,
-  baseUrlBearer: "https://api.coachio.ai/api/v1",
-  baseUrlCookie: "https://api.coachio.ai/api/v1",
+  baseUrlBearer: "https://labs.google/fx/api",
+  baseUrlCookie: "https://labs.google/fx/api",
   googleProjectId: "",
   corsProxy: "",
 };
