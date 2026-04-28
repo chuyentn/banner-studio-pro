@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { Trash2, Download, ImageOff, History, LogOut, Moon, Sun } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useTheme } from "next-themes";
+import i18nInstance from "@/lib/i18n";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -38,7 +39,7 @@ export const Route = createFileRoute("/history")({
 
 function HistoryPage() {
   const { user, logout } = useAuth();
-  const { t, i18n } = useTranslation();
+  const { t, i18n } = useTranslation(undefined, { i18n: i18nInstance });
   const { theme, setTheme } = useTheme();
 
   const [items, setItems] = useState<HistoryItem[]>([]);

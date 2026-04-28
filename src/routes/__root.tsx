@@ -4,6 +4,7 @@ import { AuthProvider } from "@/lib/auth-context";
 import { ThemeProvider } from "next-themes";
 import { Home, Wand2, History as HistoryIcon, Settings as SettingsIcon } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import i18nInstance from "../lib/i18n";
 import "../lib/i18n";
 
 import appCss from "../styles.css?url";
@@ -78,7 +79,7 @@ function RootShell({ children }: { children: React.ReactNode }) {
 }
 
 function RootComponent() {
-  const { t } = useTranslation();
+  const { t } = useTranslation(undefined, { i18n: i18nInstance });
   return (
     <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
       <AuthProvider>

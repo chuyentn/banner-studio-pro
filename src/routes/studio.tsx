@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useTheme } from "next-themes";
+import i18nInstance from "@/lib/i18n";
 
 
 import { ImageDropzone } from "@/components/ImageDropzone";
@@ -90,7 +91,7 @@ const MAX_VARIATIONS = STYLE_VARIANTS.length;
 
 function StudioPage() {
   const { user, logout } = useAuth();
-  const { t, i18n } = useTranslation();
+  const { t, i18n } = useTranslation(undefined, { i18n: i18nInstance });
   const { theme, setTheme } = useTheme();
 
   const [settings, setSettings] = useState<ApiSettings>(loadApiSettings);

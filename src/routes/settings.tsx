@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useTheme } from "next-themes";
+import i18nInstance from "@/lib/i18n";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -64,7 +65,7 @@ const TABS: TabDef[] = [
 
 function SettingsPage() {
   const { user, logout } = useAuth();
-  const { t, i18n } = useTranslation();
+  const { t, i18n } = useTranslation(undefined, { i18n: i18nInstance });
   const { theme, setTheme } = useTheme();
 
   const [s, setS] = useState<ApiSettings>(loadApiSettings);
