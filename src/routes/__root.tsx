@@ -48,7 +48,7 @@ export const Route = createRootRoute({
         content: "Nền tảng tạo banner quảng cáo AI hàng loạt dẫn đầu Việt Nam.",
       },
       { property: "og:type", content: "website" },
-      { property: "og:url", content: "https://studio.breaths.live" },
+      { property: "og:url", content: "https://banner.breaths.live" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
     links: [
