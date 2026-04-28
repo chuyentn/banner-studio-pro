@@ -399,7 +399,7 @@ function StudioPage() {
       <div className="studio-bg min-h-screen flex flex-col text-foreground">
 
       {/* ═══ FIXED HEADER ═══════════════════════════════════════════════════ */}
-      <header className="sticky top-0 z-50 border-b border-white/[0.07]"
+      <header className="fixed top-0 left-0 right-0 z-50 border-b border-white/[0.07]"
         style={{ background: "var(--surface-glass-dark)", backdropFilter: "blur(24px)" }}>
         <div className="flex h-12 shrink-0 items-center justify-between px-3 md:px-5">
           {/* Logo */}
@@ -490,7 +490,7 @@ function StudioPage() {
       </header>
 
       {/* ═══ SINGLE COLUMN CONTENT ══════════════════════════════════════════ */}
-      <div className="relative z-10 w-full max-w-[1600px] mx-auto px-3 md:px-5 pb-10 flex-1">
+      <div className="relative z-10 w-full max-w-[1600px] mx-auto px-3 md:px-5 pb-10 flex-1 pt-14">
 
         {/* ── ROW 1: Pinterest / Banner mẫu ───────────────────────────────── */}
         <section className="mt-5">

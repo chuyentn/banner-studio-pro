@@ -74,7 +74,7 @@ function HistoryPage() {
       <div className="studio-bg min-h-screen flex flex-col text-foreground">
 
       {/* Header — consistent with Studio/Settings */}
-      <header className="sticky top-0 z-50 border-b border-white/[0.07]"
+      <header className="fixed top-0 left-0 right-0 z-50 border-b border-white/[0.07]"
         style={{ background: "var(--surface-glass-dark)", backdropFilter: "blur(24px)" }}>
         <div className="flex h-12 items-center justify-between px-3 md:px-5">
           <div className="flex items-center gap-2">
@@ -122,7 +122,7 @@ function HistoryPage() {
         </div>
       </header>
 
-      <div className="relative z-10 mx-auto w-full max-w-[1400px] px-3 md:px-5 py-6 flex-1">
+      <div className="relative z-10 mx-auto w-full max-w-[1400px] px-3 md:px-5 py-6 flex-1 pt-16">
         <div className="mb-6 flex items-center justify-between">
           <div>
             <h1 className="text-xl md:text-2xl font-semibold tracking-tight">Lịch sử tạo banner</h1>

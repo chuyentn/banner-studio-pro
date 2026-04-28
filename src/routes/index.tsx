@@ -154,7 +154,7 @@ function LandingPage() {
                 <div className="rounded-2xl overflow-hidden border border-foreground/10 shadow-2xl shadow-primary/10 bg-black/50">
                   <div className="relative w-full aspect-video">
                     <iframe
-                      src="https://www.youtube.com/embed/Kc7xo710I2U?rel=0&modestbranding=1"
+                      src={`https://www.youtube.com/embed/${import.meta.env.VITE_YOUTUBE_DEMO_ID || 'Kc7xo710I2U'}?rel=0&modestbranding=1`}
                       title="Banner Studio Pro - Demo"
                       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                       allowFullScreen

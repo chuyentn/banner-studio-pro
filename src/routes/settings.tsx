@@ -154,7 +154,7 @@ function SettingsPage() {
       <div className="studio-bg min-h-screen flex flex-col text-foreground">
 
       {/* Header */}
-      <header className="sticky top-0 z-50 border-b border-white/[0.07]"
+      <header className="fixed top-0 left-0 right-0 z-50 border-b border-white/[0.07]"
         style={{ background: "var(--surface-glass-dark)", backdropFilter: "blur(24px)" }}>
         <div className="flex h-12 items-center justify-between px-3 md:px-5">
           <div className="flex items-center gap-2">
@@ -202,7 +202,7 @@ function SettingsPage() {
         </div>
       </header>
 
-      <div className="relative z-10 mx-auto w-full max-w-2xl px-4 py-6 md:py-10">
+      <div className="relative z-10 mx-auto w-full max-w-2xl px-4 py-6 md:py-10 pt-16">
 
         {/* Page title */}
         <div className="mb-8">
