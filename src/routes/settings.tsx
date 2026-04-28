@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import {
   KeyRound, Zap, Cookie, Eye, EyeOff, Save, RotateCcw,
-  CheckCircle2, Settings2, LogOut, AlertTriangle, ShieldCheck, Loader2, Moon, Sun
+  CheckCircle2, Settings2, LogOut, AlertTriangle, ShieldCheck, Loader2, Moon, Sun, ExternalLink, Sparkles
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useTheme } from "next-themes";
@@ -58,6 +58,7 @@ function MaskInput({ id, value, onChange, placeholder }: {
 type TabDef = { id: AuthMode; icon: React.ReactNode; label: string; subtitle: string };
 
 const TABS: TabDef[] = [
+  { id: "kie",     icon: <Sparkles className="h-4 w-4" />, label: "KIE AI",  subtitle: "Marketplace" },
   { id: "apikey",  icon: <KeyRound className="h-4 w-4" />, label: "API Key", subtitle: "OpenAI / Direct" },
   { id: "bearer",  icon: <Zap className="h-4 w-4" />,      label: "Token",   subtitle: "Google Flow" },
   { id: "cookie",  icon: <Cookie className="h-4 w-4" />,   label: "Cookie",  subtitle: "Google Flow" },
@@ -92,7 +93,10 @@ function SettingsPage() {
   function switchMode(newMode: AuthMode) {
     const updates: Partial<ApiSettings> = { authMode: newMode };
     
-    if (newMode === "bearer" || newMode === "cookie") {
+    if (newMode === "kie") {
+      updates.model = "gpt-image-2";
+      if (!s.kieBaseUrl) updates.kieBaseUrl = "https://api.kie.ai/v1";
+    } else if (newMode === "bearer" || newMode === "cookie") {
       // Defaults for Google Flow (Labs)
       updates.model = "nano_banana_2";
       if (!s.baseUrlBearer || s.baseUrlBearer.includes("openai.com") || s.baseUrlBearer.includes("coachio.ai")) {
@@ -114,7 +118,8 @@ function SettingsPage() {
     // Auto-save the mode switch but not sensitive keys unless user clicks save
     saveApiSettings(nextSettings);
 
-    toast.info(`Đã chuyển sang ${newMode === 'apikey' ? 'OpenAI' : 'Google Flow'}`, {
+    const modeLabel = newMode === 'kie' ? 'KIE AI Marketplace' : newMode === 'apikey' ? 'OpenAI' : 'Google Flow';
+    toast.info(`Đã chuyển sang ${modeLabel}`, {
       description: `Tự động tối ưu Model và Endpoint chuẩn chính thức.`
     });
   }
@@ -217,7 +222,7 @@ function SettingsPage() {
         </div>
 
         {/* ── AUTH TAB SELECTOR ─────────────────────────────────────────── */}
-        <div className="grid grid-cols-3 gap-2 md:gap-4 mb-1">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4 mb-1">
           {TABS.map((t) => {
             const active = mode === t.id;
             return (
@@ -244,6 +249,92 @@ function SettingsPage() {
         {/* ── TAB PANELS ────────────────────────────────────────────────── */}
         <div className="mt-4 rounded-3xl border border-white/[0.08] overflow-hidden shadow-2xl"
           style={{ background: "var(--surface-glass-light)", backdropFilter: "blur(20px)" }}>
+
+          {/* ═══ TAB 0: KIE AI MARKETPLACE ════════════════════════════════ */}
+          {mode === "kie" && (
+            <div className="p-6 md:p-8 space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-400">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-orange-500/20 to-pink-500/20 border border-orange-500/30">
+                    <Sparkles className="h-6 w-6 text-orange-400" />
+                  </div>
+                  <div>
+                    <div className="text-[15px] font-bold text-orange-400">KIE AI Marketplace</div>
+                    <div className="text-[11px] text-muted-foreground">Truy cập 50+ AI models qua một API key duy nhất</div>
+                  </div>
+                </div>
+                <div className="flex flex-col items-end gap-1.5">
+                  <button
+                    onClick={() => { const next = { ...s, kieEnabled: !s.kieEnabled }; setS(next); saveApiSettings(next); }}
+                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${s.kieEnabled ? 'bg-orange-500' : 'bg-white/10'}`}>
+                    <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${s.kieEnabled ? 'translate-x-6' : 'translate-x-1'}`} />
+                  </button>
+                  <span className="text-[9px] text-muted-foreground">{s.kieEnabled ? 'Đang bật' : 'Đã tắt'}</span>
+                </div>
+              </div>
+
+              <div className="space-y-5">
+                {/* API Key */}
+                <div className="space-y-2">
+                  <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest">KIE API Key</label>
+                  <MaskInput id="kie-apikey" value={s.kieApiKey} onChange={(v) => setS({ ...s, kieApiKey: v })}
+                    placeholder="Dán API Key từ kie.ai/vi/settings..." />
+                  <a href="https://kie.ai/vi/settings" target="_blank" rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 text-[10px] text-orange-400 hover:text-orange-300 transition-colors">
+                    <ExternalLink className="h-3 w-3" /> Lấy API Key tại kie.ai →
+                  </a>
+                </div>
+
+                {/* Base URL */}
+                <div className="space-y-2">
+                  <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest">KIE Base URL</label>
+                  <Input value={s.kieBaseUrl} onChange={(e) => setS({ ...s, kieBaseUrl: e.target.value })}
+                    className="font-mono text-[11px] h-10 bg-white/[0.04] border-white/[0.08]" />
+                </div>
+
+                {/* Model Selectors */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                  <div className="space-y-2">
+                    <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest">🖼️ Image Model</label>
+                    <select value={s.kieImageModel} onChange={(e) => setS({ ...s, kieImageModel: e.target.value })}
+                      className="w-full h-10 rounded-lg border border-white/[0.08] bg-white/[0.04] px-3 text-[12px] text-foreground focus:ring-1 focus:ring-primary outline-none">
+                      <option value="flux-2/pro-text-to-image">Flux-2 Pro (Text→Image)</option>
+                      <option value="ideogram/v3">Ideogram V3</option>
+                      <option value="gpt-image-2">GPT Image 2 (OpenAI)</option>
+                      <option value="nano_banana_2">Nano Banana 2 (Google)</option>
+                      <option value="dall-e-3">DALL·E 3</option>
+                    </select>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest">🎬 Video Model</label>
+                    <select value={s.kieVideoModel} onChange={(e) => setS({ ...s, kieVideoModel: e.target.value })}
+                      className="w-full h-10 rounded-lg border border-white/[0.08] bg-white/[0.04] px-3 text-[12px] text-foreground focus:ring-1 focus:ring-primary outline-none">
+                      <option value="kling/kling-3-0">Kling 3.0</option>
+                      <option value="openai/sora-2">Sora 2 (OpenAI)</option>
+                      <option value="seedance-2/video-generation">Seedance 2.0 (ByteDance)</option>
+                      <option value="minimax/video-01">MiniMax Video-01</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Quick links */}
+                <div className="flex flex-wrap gap-2 pt-1">
+                  <a href="https://kie.ai/vi/settings" target="_blank" rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 rounded-full bg-orange-500/10 border border-orange-500/20 px-3 py-1.5 text-[10px] font-bold text-orange-400 hover:bg-orange-500/20 transition-colors">
+                    <KeyRound className="h-3 w-3" /> Quản lý API Key
+                  </a>
+                  <a href="https://kie.ai/vi/models" target="_blank" rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 rounded-full bg-white/[0.05] border border-white/[0.08] px-3 py-1.5 text-[10px] font-bold text-muted-foreground hover:text-foreground transition-colors">
+                    <Sparkles className="h-3 w-3" /> Xem Models
+                  </a>
+                  <a href="https://kie.ai/vi/pricing" target="_blank" rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 rounded-full bg-white/[0.05] border border-white/[0.08] px-3 py-1.5 text-[10px] font-bold text-muted-foreground hover:text-foreground transition-colors">
+                    <ExternalLink className="h-3 w-3" /> Bảng giá
+                  </a>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* ═══ TAB 1: API KEY (Official OpenAI) ═══════════════════════════ */}
           {mode === "apikey" && (

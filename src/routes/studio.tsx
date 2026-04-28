@@ -388,6 +388,7 @@ function StudioPage() {
   const doneCount = slots.filter((s) => s.status === "done").length;
 
   const isApiReady = (() => {
+    if (settings.authMode === "kie") return !!settings.kieApiKey;
     if (settings.authMode === "apikey") return !!settings.apiKey;
     if (settings.authMode === "bearer") return !!settings.accessToken;
     if (settings.authMode === "cookie") return !!settings.cookies;

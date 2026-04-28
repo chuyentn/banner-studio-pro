@@ -1,7 +1,7 @@
 const KEY_API = "banner_studio.api";
 const KEY_HISTORY = "banner_studio.history";
 
-export type AuthMode = "apikey" | "bearer" | "cookie";
+export type AuthMode = "apikey" | "bearer" | "cookie" | "kie";
 
 export type ApiSettings = {
   apiKey: string;
@@ -15,6 +15,11 @@ export type ApiSettings = {
   baseUrlCookie: string;
   googleProjectId: string;
   corsProxy: string;
+  kieApiKey: string;
+  kieBaseUrl: string;
+  kieImageModel: string;
+  kieVideoModel: string;
+  kieEnabled: boolean;
 };
 
 export const defaultApiSettings: ApiSettings = {
@@ -29,6 +34,11 @@ export const defaultApiSettings: ApiSettings = {
   baseUrlCookie: "https://labs.google/fx/api",
   googleProjectId: "",
   corsProxy: "",
+  kieApiKey: (typeof import.meta !== "undefined" && import.meta.env?.VITE_KIE_API_KEY) || "",
+  kieBaseUrl: "https://api.kie.ai/v1",
+  kieImageModel: (typeof import.meta !== "undefined" && import.meta.env?.VITE_KIE_DEFAULT_IMAGE_MODEL) || "flux-2/pro-text-to-image",
+  kieVideoModel: (typeof import.meta !== "undefined" && import.meta.env?.VITE_KIE_DEFAULT_VIDEO_MODEL) || "kling/kling-3-0",
+  kieEnabled: !!(typeof import.meta !== "undefined" && import.meta.env?.VITE_KIE_API_KEY),
 };
 
 export function loadApiSettings(): ApiSettings {
