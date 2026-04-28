@@ -531,21 +531,36 @@ function StudioPage() {
         </section>
 
         {/* ── ROW 3: Info + Controls ───────────────────────────────────────── */}
-        <section className="mt-4 grid grid-cols-1 gap-3 md:gap-4 md:grid-cols-3">
-          {/* Col 1: Product info */}
-          <div className="space-y-4">
-            <div className="space-y-1.5">
-              <label className="text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground">Thông tin sản phẩm</label>
-              <Textarea
-                placeholder="Mô tả sản phẩm: Serum dưỡng ẩm 24h chiết xuất rau má, 30ml…"
-                value={productInfo}
-                onChange={(e) => setProductInfo(e.target.value)}
-                rows={3}
-                className="resize-none text-xs bg-white/[0.04] border-white/[0.08] placeholder:text-muted-foreground/40"
-              />
-            </div>
-            
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <section className="mt-5 flex flex-col gap-6">
+          {/* Brand Info */}
+          <div className="space-y-3">
+            <label className="bracket-label">Tên / Thông tin brand</label>
+            <Input placeholder="Khải Hoàn Prime - Căn hộ resort ven sông cao cấp tại Lê Văn Lương, Nhơn Đức, Nhà Bè, TP.HCM..." value={brand} onChange={(e) => setBrand(e.target.value)}
+              className="h-10 text-xs bg-white/[0.04] border-white/[0.08]" />
+            <Textarea
+              placeholder="Mô tả sản phẩm: Serum dưỡng ẩm 24h chiết xuất rau má, 30ml…"
+              value={productInfo}
+              onChange={(e) => setProductInfo(e.target.value)}
+              rows={2}
+              className="resize-none text-xs bg-white/[0.04] border-white/[0.08] placeholder:text-muted-foreground/40"
+            />
+          </div>
+
+          {/* Prompt Tweak */}
+          <div className="space-y-3">
+            <label className="bracket-label">Prompt thay đổi (Tuỳ chọn)</label>
+            <Textarea
+              placeholder='VD: dùng tông pastel, thêm khẩu hiệu "Glow Naturally"…'
+              value={prompt}
+              onChange={(e) => setPrompt(e.target.value)}
+              rows={2}
+              className="resize-none text-xs bg-white/[0.04] border-white/[0.08] placeholder:text-muted-foreground/40"
+            />
+          </div>
+
+          {/* Dropzones */}
+          <div className="space-y-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <ImageDropzone
                 label="Logo thương hiệu"
                 hint="Tuỳ chọn"
@@ -564,9 +579,9 @@ function StudioPage() {
               />
             </div>
 
-            {/* ── Logo & KOL Placement Controls (Basic + Advanced Toggle) ── */}
+            {/* ── Logo & KOL Placement Controls ── */}
             {(brandLogo.length > 0 || kolAvatar.length > 0) && (
-              <div className="mt-3 rounded-xl border border-white/[0.08] p-3 space-y-3" style={{ background: "var(--surface-glass)" }}>
+              <div className="mt-2 rounded-xl border border-white/[0.08] p-4 space-y-4" style={{ background: "var(--surface-glass)" }}>
                 <div className="flex items-center justify-between">
                   <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-primary/80">⚙ Bố cục Logo & KOL</span>
                   <Button variant="ghost" size="sm" onClick={() => setShowAdvanced(!showAdvanced)} className="h-6 text-[10px] md:text-[11px] text-muted-foreground">
@@ -574,169 +589,146 @@ function StudioPage() {
                   </Button>
                 </div>
 
-                {brandLogo.length > 0 && (
-                  <div className="space-y-2">
-                    <span className="text-[10px] font-semibold text-muted-foreground">Logo</span>
-                    <div className="grid grid-cols-3 gap-1.5">
-                      {/* Position Grid */}
-                      <div>
-                        <span className="text-[9px] text-muted-foreground/60 block mb-1">Vị trí</span>
-                        <div className="position-grid">
-                          {(() => {
-                            const GRID: { pos: LogoPosition; label: string }[] = [
-                              { pos: "top-left", label: "↖" }, { pos: "top-center", label: "↑" }, { pos: "top-right", label: "↗" },
-                              { pos: "center", label: "" }, { pos: "center", label: "◉" }, { pos: "center", label: "" },
-                              { pos: "bottom-left", label: "↙" }, { pos: "bottom-center", label: "↓" }, { pos: "bottom-right", label: "↘" },
-                            ];
-                            return GRID.map((cell, i) => {
-                              if (!cell.label) return <div key={i} className="position-grid-cell" style={{ opacity: 0, pointerEvents: "none" as const }} />;
-                              return (
-                                <button key={i} type="button"
-                                  className={`position-grid-cell ${logoPosition === cell.pos ? "active" : ""}`}
-                                  onClick={() => setLogoPosition(cell.pos)}
-                                  title={cell.pos}>
-                                  {cell.label}
-                                </button>
-                              );
-                            });
-                          })()}
-                        </div>
-                      </div>
-                      {showAdvanced && (
-                        <>
-                          {/* Size */}
-                          <div>
-                            <span className="text-[11px] text-muted-foreground/80 block mb-1">Kích thước</span>
-                            <Select value={logoSize} onValueChange={(v) => setLogoSize(v as LogoSize)}>
-                              <SelectTrigger className="h-10 sm:h-8 text-xs bg-white/[0.04] border-white/[0.08]"><SelectValue /></SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="small">Nhỏ</SelectItem>
-                                <SelectItem value="medium">Vừa</SelectItem>
-                                <SelectItem value="large">Lớn</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
-                          {/* Opacity */}
-                          <div>
-                            <span className="text-[11px] text-muted-foreground/80 block mb-1">Opacity {logoOpacity}%</span>
-                            <input type="range" min={10} max={100} step={10} value={logoOpacity}
-                              onChange={(e) => setLogoOpacity(Number(e.target.value))}
-                              className="w-full accent-[var(--primary)] h-1" />
-                          </div>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                )}
-
-                {kolAvatar.length > 0 && (
-                  <div className="space-y-2">
-                    <span className="text-[11px] font-semibold text-muted-foreground">KOL / Đại sứ</span>
-                    <div className="grid grid-cols-2 gap-2">
-                      <div>
-                        <span className="text-[11px] text-muted-foreground/80 block mb-1">Vị trí</span>
-                        <Select value={kolPosition} onValueChange={(v) => setKolPosition(v as KolPosition)}>
-                          <SelectTrigger className="h-10 sm:h-8 text-xs bg-white/[0.04] border-white/[0.08]"><SelectValue /></SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="left">← Trái</SelectItem>
-                            <SelectItem value="center">◉ Giữa</SelectItem>
-                            <SelectItem value="right">→ Phải</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      {showAdvanced && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {brandLogo.length > 0 && (
+                    <div className="space-y-2">
+                      <span className="text-[10px] font-semibold text-muted-foreground">Logo</span>
+                      <div className="grid grid-cols-2 gap-3">
                         <div>
-                          <span className="text-[11px] text-muted-foreground/80 block mb-1">Khung hình</span>
-                          <Select value={kolFraming} onValueChange={(v) => setKolFraming(v as KolFraming)}>
-                            <SelectTrigger className="h-10 sm:h-8 text-xs bg-white/[0.04] border-white/[0.08]"><SelectValue /></SelectTrigger>
+                          <span className="text-[9px] text-muted-foreground/60 block mb-1">Vị trí</span>
+                          <div className="position-grid">
+                            {(() => {
+                              const GRID: { pos: LogoPosition; label: string }[] = [
+                                { pos: "top-left", label: "↖" }, { pos: "top-center", label: "↑" }, { pos: "top-right", label: "↗" },
+                                { pos: "center", label: "" }, { pos: "center", label: "◉" }, { pos: "center", label: "" },
+                                { pos: "bottom-left", label: "↙" }, { pos: "bottom-center", label: "↓" }, { pos: "bottom-right", label: "↘" },
+                              ];
+                              return GRID.map((cell, i) => {
+                                if (!cell.label) return <div key={i} className="position-grid-cell" style={{ opacity: 0, pointerEvents: "none" as const }} />;
+                                return (
+                                  <button key={i} type="button"
+                                    className={`position-grid-cell ${logoPosition === cell.pos ? "active" : ""}`}
+                                    onClick={() => setLogoPosition(cell.pos)}
+                                    title={cell.pos}>
+                                    {cell.label}
+                                  </button>
+                                );
+                              });
+                            })()}
+                          </div>
+                        </div>
+                        {showAdvanced && (
+                          <div className="space-y-2">
+                            <div>
+                              <span className="text-[11px] text-muted-foreground/80 block mb-1">Kích thước</span>
+                              <Select value={logoSize} onValueChange={(v) => setLogoSize(v as LogoSize)}>
+                                <SelectTrigger className="h-8 text-xs bg-white/[0.04] border-white/[0.08]"><SelectValue /></SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="small">Nhỏ</SelectItem>
+                                  <SelectItem value="medium">Vừa</SelectItem>
+                                  <SelectItem value="large">Lớn</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <div>
+                              <span className="text-[11px] text-muted-foreground/80 block mb-1">Opacity {logoOpacity}%</span>
+                              <input type="range" min={10} max={100} step={10} value={logoOpacity}
+                                onChange={(e) => setLogoOpacity(Number(e.target.value))}
+                                className="w-full accent-[var(--primary)] h-1" />
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {kolAvatar.length > 0 && (
+                    <div className="space-y-2">
+                      <span className="text-[11px] font-semibold text-muted-foreground">KOL / Đại sứ</span>
+                      <div className="grid grid-cols-2 gap-2">
+                        <div>
+                          <span className="text-[11px] text-muted-foreground/80 block mb-1">Vị trí</span>
+                          <Select value={kolPosition} onValueChange={(v) => setKolPosition(v as KolPosition)}>
+                            <SelectTrigger className="h-8 text-xs bg-white/[0.04] border-white/[0.08]"><SelectValue /></SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="auto">Auto — AI chọn</SelectItem>
-                              <SelectItem value="full-body">Toàn thân</SelectItem>
-                              <SelectItem value="upper-body">Bán thân</SelectItem>
-                              <SelectItem value="face">Khuôn mặt</SelectItem>
+                              <SelectItem value="left">← Trái</SelectItem>
+                              <SelectItem value="center">◉ Giữa</SelectItem>
+                              <SelectItem value="right">→ Phải</SelectItem>
                             </SelectContent>
                           </Select>
                         </div>
-                      )}
+                        {showAdvanced && (
+                          <div>
+                            <span className="text-[11px] text-muted-foreground/80 block mb-1">Khung hình</span>
+                            <Select value={kolFraming} onValueChange={(v) => setKolFraming(v as KolFraming)}>
+                              <SelectTrigger className="h-8 text-xs bg-white/[0.04] border-white/[0.08]"><SelectValue /></SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="auto">Auto — AI chọn</SelectItem>
+                                <SelectItem value="full-body">Toàn thân</SelectItem>
+                                <SelectItem value="upper-body">Bán thân</SelectItem>
+                                <SelectItem value="face">Khuôn mặt</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-          {/* Col 2: Brand + Prompt */}
-          <div className="space-y-1.5">
-            <label className="text-[11px] font-bold uppercase tracking-[0.15em] text-muted-foreground">Thương hiệu</label>
-            <Input placeholder="NovaSkin, Acme Coffee…" value={brand} onChange={(e) => setBrand(e.target.value)}
-              className="h-10 sm:h-9 text-xs bg-white/[0.04] border-white/[0.08]" />
-            {showAdvanced && (
-              <>
-                <label className="mt-2 block text-[11px] font-bold uppercase tracking-[0.15em] text-muted-foreground">Prompt tuỳ chọn</label>
-              <Textarea
-                placeholder='VD: "nền be, mood mùa thu, không logo"…'
-                value={prompt}
-                onChange={(e) => setPrompt(e.target.value)}
-                rows={2}
-                className="resize-none text-xs bg-white/[0.04] border-white/[0.08] placeholder:text-muted-foreground/40"
-              />
-              </>
-            )}
-          </div>
-          {/* Col 3: Ratio + Advanced Settings */}
-          <div className="space-y-2.5">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              <div>
-                <label className="text-[11px] font-bold uppercase tracking-[0.15em] text-muted-foreground">Tỷ lệ</label>
-                <Select value={ratio} onValueChange={handleRatioChange}>
-                  <SelectTrigger className="mt-1 h-10 sm:h-8 text-xs bg-white/[0.04] border-white/[0.08]"><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    {(Object.keys(RATIO_LABELS) as Ratio[]).map((r) => <SelectItem key={r} value={r}>{RATIO_LABELS[r]}</SelectItem>)}
-                  </SelectContent>
-                </Select>
-              </div>
-              {showAdvanced && (
-                <div>
-                  <label className="text-[11px] font-bold uppercase tracking-[0.15em] text-muted-foreground flex items-center gap-1">
-                    Chất lượng {allowedQualities.length < 3 && <span className="text-[10px] text-primary normal-case">(hạn chế)</span>}
-                  </label>
-                  <Select value={quality} onValueChange={(v) => setQuality(v as Quality)}>
-                    <SelectTrigger className="mt-1 h-10 sm:h-8 text-xs bg-white/[0.04] border-white/[0.08]"><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      {(Object.keys(QUALITY_LABELS) as Quality[]).map((q) => (
-                        <SelectItem key={q} value={q} disabled={!allowedQualities.includes(q)}>{QUALITY_LABELS[q]}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  )}
                 </div>
-              )}
+              </div>
+            )}
+          </div>
+
+          {/* Controls: Ratio, Quality, Typography, Variations */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-5">
+            {/* Aspect Ratio */}
+            <div className="space-y-3">
+              <label className="bracket-label">Tỷ lệ ảnh</label>
+              <Select value={ratio} onValueChange={handleRatioChange}>
+                <SelectTrigger className="h-10 text-xs bg-white/[0.04] border-white/[0.08]"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {(Object.keys(RATIO_LABELS) as Ratio[]).map((r) => <SelectItem key={r} value={r}>{RATIO_LABELS[r]}</SelectItem>)}
+                </SelectContent>
+              </Select>
             </div>
-            {showAdvanced && (
-              <>
-                <div className="mt-2">
-                  <label className="text-[11px] font-bold uppercase tracking-[0.15em] text-muted-foreground">Typography</label>
-                  <Select value={typographyId} onValueChange={setTypographyId}>
-                    <SelectTrigger className="mt-1 h-10 sm:h-8 text-xs bg-white/[0.04] border-white/[0.08]"><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value={AUTO_TYPO_ID}>Auto — AI tự chọn</SelectItem>
-                      {TYPO_CATEGORIES.map((c) => <SelectItem key={c.id} value={c.id}>{c.label}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="mt-2">
-                  <label className="text-[11px] font-bold uppercase tracking-[0.15em] text-muted-foreground flex justify-between">
-                    Số phong cách <span className="text-foreground font-bold">{variations}</span>
-                  </label>
-                  <input type="range" min={1} max={MAX_VARIATIONS} value={variations}
-                    onChange={(e) => setVariations(Number(e.target.value))}
-                    className="mt-1 w-full accent-[var(--primary)]" />
-                </div>
-              </>
-            )}
-            {!showAdvanced && (
-              <Button variant="ghost" className="w-full text-xs text-muted-foreground h-10 border border-dashed border-white/10 mt-2" onClick={() => setShowAdvanced(true)}>
-                Hiển thị tùy chọn nâng cao
-              </Button>
-            )}
+            
+            {/* Quality */}
+            <div className="space-y-3">
+              <label className="bracket-label">Chất lượng {allowedQualities.length < 3 && <span className="text-[9px] text-primary normal-case font-normal">(hạn chế)</span>}</label>
+              <Select value={quality} onValueChange={(v) => setQuality(v as Quality)}>
+                <SelectTrigger className="h-10 text-xs bg-white/[0.04] border-white/[0.08]"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {(Object.keys(QUALITY_LABELS) as Quality[]).map((q) => (
+                    <SelectItem key={q} value={q} disabled={!allowedQualities.includes(q)}>{QUALITY_LABELS[q]}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Typography */}
+            <div className="space-y-3">
+              <label className="bracket-label">Typography</label>
+              <Select value={typographyId} onValueChange={setTypographyId}>
+                <SelectTrigger className="h-10 text-xs bg-white/[0.04] border-white/[0.08]"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={AUTO_TYPO_ID}>Auto — AI tự chọn</SelectItem>
+                  {TYPO_CATEGORIES.map((c) => <SelectItem key={c.id} value={c.id}>{c.label}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Variations */}
+            <div className="space-y-3">
+              <label className="bracket-label flex w-full justify-between">
+                <span>Số phong cách</span>
+                <span className="text-white">{variations}</span>
+              </label>
+              <div className="flex h-10 items-center">
+                <input type="range" min={1} max={MAX_VARIATIONS} value={variations}
+                  onChange={(e) => setVariations(Number(e.target.value))}
+                  className="w-full accent-[var(--primary-gold)]" />
+              </div>
+            </div>
           </div>
         </section>
 

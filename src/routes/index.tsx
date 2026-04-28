@@ -1,8 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Sparkles, Zap, ShieldCheck, Layers, ArrowRight, Star, CheckCircle2, ImageIcon, Moon, Sun, Check, MessageCircle, Mail } from "lucide-react";
+import { Sparkles, Zap, ShieldCheck, Layers, ArrowRight, Star, CheckCircle2, ImageIcon, Moon, Sun, Check, MessageCircle, Mail, Wand2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTranslation } from "react-i18next";
 import { useTheme } from "next-themes";
+import i18nInstance from "@/lib/i18n";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -19,7 +20,7 @@ export const Route = createFileRoute("/")({
 });
 
 function LandingPage() {
-  const { t, i18n } = useTranslation();
+  const { t, i18n } = useTranslation(undefined, { i18n: i18nInstance });
   const { theme, setTheme } = useTheme();
 
   return (

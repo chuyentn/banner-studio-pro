@@ -114,6 +114,9 @@
   --sidebar-accent-foreground: oklch(0.15 0.03 260);
   --sidebar-border: oklch(0.85 0.02 260);
   --sidebar-ring: oklch(0.55 0.25 280);
+
+  /* Gold/Yellow for labels */
+  --primary-gold: oklch(0.80 0.15 85);
 }
 
 /* .dark inherits the red/warm palette from :root (app is always dark-themed).
@@ -219,6 +222,34 @@
   to {
     background-position: 200% center;
   }
+}
+
+/* ── Bracket Label ───────────────────────────────────────────────────────── */
+.bracket-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--primary-gold);
+}
+
+.bracket-label::before,
+.bracket-label::after {
+  content: '';
+  width: 4px;
+  height: 12px;
+  border: 1.5px solid var(--primary-gold);
+}
+
+.bracket-label::before {
+  border-right: none;
+}
+
+.bracket-label::after {
+  border-left: none;
 }
 
 /* ── Position Grid (Logo placement selector) ─────────────────────────────── */

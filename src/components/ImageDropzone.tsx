@@ -158,7 +158,7 @@ export function ImageDropzone({
           <div className={cn("flex flex-col items-center justify-center text-center", padY)}>
             <ImagePlus className="mb-1 h-4 w-4 text-muted-foreground" />
             <div className="text-[11px] text-muted-foreground">
-              Click · kéo thả · Ctrl/Cmd+V để dán
+              Click - kéo thả - Ctrl/Cmd+V để dán
             </div>
           </div>
         ) : (
