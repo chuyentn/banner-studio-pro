@@ -18,9 +18,9 @@ export type ApiSettings = {
 };
 
 export const defaultApiSettings: ApiSettings = {
-  apiKey: "",
+  apiKey: (typeof import.meta !== "undefined" && import.meta.env?.VITE_KIE_API_KEY) || "",
   baseUrl: "https://api.openai.com/v1",
-  model: "gpt-image-2",
+  model: (typeof import.meta !== "undefined" && import.meta.env?.VITE_KIE_DEFAULT_MODEL) || "gpt-image-2",
   authMode: "apikey",
   accessToken: "",
   cookies: "",
