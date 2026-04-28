@@ -1,5 +1,32 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Sparkles, Zap, ShieldCheck, Layers, ArrowRight, Star, CheckCircle2, ImageIcon, Moon, Sun, Check, MessageCircle, Mail, Wand2, ExternalLink, Github, Send, Users, Phone, Calendar } from "lucide-react";
+import { Sparkles, Zap, ShieldCheck, Layers, ArrowRight, Star, CheckCircle2, ImageIcon, Moon, Sun, Check, MessageCircle, Mail, Wand2, ExternalLink, Github, Send, Users, Phone, Calendar, Play } from "lucide-react";
+
+/* ── Inline SVG flag components (render reliably unlike emoji) ──────────── */
+function FlagVN({ className = "" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 30 20" className={className} aria-label="Tiếng Việt">
+      <rect width="30" height="20" rx="2" fill="#DA251D" />
+      <polygon points="15,3.5 16.8,9.2 22.8,9.2 17.9,12.8 19.6,18.5 15,15 10.4,18.5 12.1,12.8 7.2,9.2 13.2,9.2" fill="#FFFF00" />
+    </svg>
+  );
+}
+function FlagUS({ className = "" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 30 20" className={className} aria-label="English">
+      <rect width="30" height="20" rx="2" fill="#B22234" />
+      {[1,3,5,7,9,11].map(i => <rect key={i} y={i * 20/13} width="30" height={20/13} fill="white" />)}
+      <rect width="12" height={20*7/13} fill="#3C3B6E" />
+      {/* simplified stars cluster */}
+      <g fill="white" fontSize="2.5" fontFamily="serif">
+        {[1.5,4.5,7.5,10.5].map((x,xi) =>
+          [1.2,3.4,5.6,7.8].map((y,yi) => (
+            <circle key={`${xi}-${yi}`} cx={x} cy={y} r="0.55" />
+          ))
+        )}
+      </g>
+    </svg>
+  );
+}
 import { Button } from "@/components/ui/button";
 import { useTranslation } from "react-i18next";
 import { useTheme } from "next-themes";
@@ -45,8 +72,15 @@ function LandingPage() {
             <button onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')} className="p-2 text-muted-foreground hover:text-foreground rounded-lg hover:bg-foreground/5 hidden sm:block">
               {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
             </button>
-            <button onClick={() => i18n.changeLanguage(i18n.language === 'vi' ? 'en' : 'vi')} className="p-2 text-lg leading-none rounded-lg hover:bg-foreground/5 hidden sm:block">
-              {i18n.language === 'vi' ? '🇻🇳' : '🇬🇧'}
+            <button
+              onClick={() => i18n.changeLanguage(i18n.language === 'vi' ? 'en' : 'vi')}
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-foreground/10 hover:border-primary/40 hover:bg-foreground/5 transition-all hidden sm:flex"
+              title={i18n.language === 'vi' ? 'Chuyển sang English' : 'Switch to Tiếng Việt'}
+            >
+              {i18n.language === 'vi'
+                ? <><FlagVN className="h-4 w-6 rounded-[2px] shadow-sm" /><span className="text-[11px] font-bold text-foreground">VN</span></>
+                : <><FlagUS className="h-4 w-6 rounded-[2px] shadow-sm" /><span className="text-[11px] font-bold text-foreground">EN</span></>
+              }
             </button>
 
             {/* CTAs */}
@@ -103,6 +137,26 @@ function LandingPage() {
                 <Calendar className="h-4 w-4" /> Đặt lịch tư vấn
               </a>
             </div>
+          </div>
+        </section>
+
+        {/* ─── VIDEO DEMO ────────────────────────────────────────────────────── */}
+        <section className="py-16 md:py-24 px-4">
+          <div className="mx-auto max-w-4xl">
+            <div className="text-center mb-10">
+              <h2 className="text-2xl md:text-4xl font-black tracking-tight mb-3">Xem Demo trải nghiệm</h2>
+              <p className="text-muted-foreground text-base md:text-lg">Trải nghiệm trực tiếp quy trình tạo banner AI chỉ trong 60 giây.</p>
+            </div>
+            <div className="relative w-full aspect-video rounded-2xl overflow-hidden border border-foreground/10 shadow-2xl shadow-primary/10 bg-black">
+              <iframe
+                src="https://www.youtube.com/embed/dQw4w9WgXcQ?rel=0&modestbranding=1"
+                title="Banner Studio Pro - Demo"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowFullScreen
+                className="absolute inset-0 w-full h-full"
+              />
+            </div>
+            <p className="text-center mt-4 text-xs text-muted-foreground">💡 Thay thế bằng video demo thực tế của bạn bằng cách cập nhật YouTube Video ID</p>
           </div>
         </section>
 
