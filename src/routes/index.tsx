@@ -97,66 +97,92 @@ function LandingPage() {
       </nav>
 
       <main>
-        {/* ─── HERO ──────────────────────────────────────────────────────────── */}
-        <section className="relative pt-32 pb-20 md:pt-48 md:pb-32 flex flex-col items-center overflow-hidden">
+        {/* ─── HERO (2-col: Text + Video) ──────────────────────────────────── */}
+        <section className="relative pt-28 pb-16 md:pt-40 md:pb-24 overflow-hidden">
           <div className="absolute top-[-10%] left-[5%] w-[400px] md:w-[800px] h-[400px] md:h-[800px] bg-primary/10 blur-[100px] md:blur-[160px] rounded-full pointer-events-none" />
           <div className="absolute top-[15%] right-[-10%] w-[300px] md:w-[600px] h-[300px] md:h-[600px] bg-accent/10 blur-[80px] md:blur-[140px] rounded-full pointer-events-none" />
           
-          <div className="mx-auto max-w-5xl px-6 text-center relative z-10 w-full animate-in fade-in slide-in-from-bottom-8 duration-1000">
-            <h1 className="text-4xl md:text-7xl lg:text-8xl font-black tracking-tight leading-[1.1] md:leading-[1.1] mb-6">
-              Sản xuất banner quảng cáo <br className="hidden md:block" />
-              <span className="text-primary shimmer-text">tự động hoàn toàn</span>
-            </h1>
-            
-            <p className="mx-auto max-w-2xl text-lg md:text-xl text-muted-foreground font-medium mb-10 leading-relaxed">
-              Từ 1 ảnh sản phẩm đến hàng nghìn banner đa phong cách. Không cần thiết kế, tối ưu CTR với AI. Không cần thẻ tín dụng.
-            </p>
-            
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-10">
-              <Link to="/studio" className="w-full sm:w-auto">
-                <Button size="lg" className="w-full sm:w-auto h-14 px-8 text-base font-bold rounded-xl bg-primary hover:bg-primary/90 text-white shadow-xl shadow-primary/25 transition-all hover:scale-105 active:scale-95">
-                  Bắt đầu miễn phí
-                </Button>
-              </Link>
-              <a href="https://cal.com/victorchuyen/coachai" target="_blank" rel="noreferrer" className="w-full sm:w-auto">
-                <Button variant="outline" size="lg" className="w-full sm:w-auto h-14 px-8 text-base font-bold rounded-xl border-foreground/10 hover:bg-foreground/5 transition-all">
-                  <Calendar className="h-5 w-5 mr-2" /> Đặt lịch tư vấn
-                </Button>
-              </a>
+          <div className="mx-auto max-w-7xl px-6 relative z-10">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-center">
+              {/* Left: Text */}
+              <div className="animate-in fade-in slide-in-from-bottom-8 duration-1000">
+                <h1 className="text-4xl md:text-5xl lg:text-6xl font-black tracking-tight leading-[1.1] mb-6">
+                  Sản xuất banner quảng cáo{" "}
+                  <span className="text-primary shimmer-text">tự động hoàn toàn</span>
+                </h1>
+                
+                <p className="max-w-xl text-base md:text-lg text-muted-foreground font-medium mb-8 leading-relaxed">
+                  Từ 1 ảnh sản phẩm đến hàng nghìn banner đa phong cách. Không cần thiết kế, tối ưu CTR với AI. Không cần thẻ tín dụng.
+                </p>
+                
+                <div className="flex flex-col sm:flex-row gap-3 mb-6">
+                  <Link to="/studio" className="w-full sm:w-auto">
+                    <Button size="lg" className="w-full sm:w-auto h-14 px-8 text-base font-bold rounded-xl bg-primary hover:bg-primary/90 text-white shadow-xl shadow-primary/25 transition-all hover:scale-105 active:scale-95">
+                      Bắt đầu miễn phí
+                    </Button>
+                  </Link>
+                  <a href="https://cal.com/victorchuyen/coachai" target="_blank" rel="noreferrer" className="w-full sm:w-auto">
+                    <Button variant="outline" size="lg" className="w-full sm:w-auto h-14 px-8 text-base font-bold rounded-xl border-foreground/10 hover:bg-foreground/5 transition-all">
+                      <Calendar className="h-5 w-5 mr-2" /> Đặt lịch tư vấn
+                    </Button>
+                  </a>
+                </div>
+
+                {/* Quick links */}
+                <div className="flex flex-wrap gap-3 mb-6">
+                  <a href="https://github.com/tncsharetool" target="_blank" rel="noreferrer" className="flex items-center gap-1.5 text-xs font-bold text-muted-foreground px-3 py-2 rounded-lg border border-foreground/10 hover:border-primary/40 hover:text-foreground transition-all">
+                    <Github className="h-3.5 w-3.5" /> GitHub Source
+                  </a>
+                  <a href="#features" className="flex items-center gap-1.5 text-xs font-bold text-muted-foreground px-3 py-2 rounded-lg border border-foreground/10 hover:border-primary/40 hover:text-foreground transition-all">
+                    <Play className="h-3.5 w-3.5" /> Xem tính năng
+                  </a>
+                </div>
+
+                {/* Contact row */}
+                <div className="flex flex-wrap gap-4 text-xs font-semibold text-muted-foreground">
+                  <a href="https://zalo.me/0989890022" className="flex items-center gap-1.5 hover:text-primary transition-colors">
+                    <MessageCircle className="h-3.5 w-3.5" /> Zalo: 098.989.0022
+                  </a>
+                  <a href="mailto:support@coach.io.vn" className="flex items-center gap-1.5 hover:text-primary transition-colors">
+                    <Mail className="h-3.5 w-3.5" /> support@coach.io.vn
+                  </a>
+                </div>
+              </div>
+
+              {/* Right: Video */}
+              <div className="animate-in fade-in slide-in-from-right-8 duration-1000 delay-200">
+                <div className="rounded-2xl overflow-hidden border border-foreground/10 shadow-2xl shadow-primary/10 bg-black/50">
+                  <div className="relative w-full aspect-video">
+                    <iframe
+                      src="https://www.youtube.com/embed/dQw4w9WgXcQ?rel=0&modestbranding=1"
+                      title="Banner Studio Pro - Demo"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                      allowFullScreen
+                      className="absolute inset-0 w-full h-full"
+                    />
+                  </div>
+                  <div className="flex items-center gap-2 px-4 py-3 border-t border-foreground/10 bg-background/60 backdrop-blur-sm">
+                    <Play className="h-4 w-4 text-primary" />
+                    <span className="text-[11px] text-muted-foreground font-semibold">Demo: Tạo hàng loạt banner quảng cáo trong 60 giây với AI</span>
+                  </div>
+                </div>
+              </div>
             </div>
 
-            {/* Liên hệ Info */}
-            <div className="flex flex-wrap items-center justify-center gap-6 text-sm font-semibold text-muted-foreground">
-              <a href="https://zalo.me/0989890022" className="flex items-center gap-2 hover:text-primary transition-colors">
-                <MessageCircle className="h-4 w-4" /> Zalo: 098.989.0022
-              </a>
-              <a href="mailto:support@coach.io.vn" className="flex items-center gap-2 hover:text-primary transition-colors">
-                <Mail className="h-4 w-4" /> support@coach.io.vn
-              </a>
-              <a href="https://cal.com/victorchuyen/coachai" target="_blank" rel="noreferrer" className="flex items-center gap-2 hover:text-primary transition-colors">
-                <Calendar className="h-4 w-4" /> Đặt lịch tư vấn
-              </a>
+            {/* Stats bar */}
+            <div className="flex justify-center gap-12 md:gap-20 flex-wrap mt-16 pt-10 border-t border-foreground/5">
+              {[
+                { num: "5+", label: "AI Models" },
+                { num: "7", label: "Công cụ sáng tạo" },
+                { num: "24/7", label: "Cloud Platform" },
+                { num: "0đ", label: "Bắt đầu miễn phí" },
+              ].map((s, i) => (
+                <div key={i} className="text-center">
+                  <div className="text-3xl md:text-4xl font-black text-foreground">{s.num}</div>
+                  <div className="text-[10px] uppercase tracking-[2px] text-muted-foreground font-bold mt-1">{s.label}</div>
+                </div>
+              ))}
             </div>
-          </div>
-        </section>
-
-        {/* ─── VIDEO DEMO ────────────────────────────────────────────────────── */}
-        <section className="py-16 md:py-24 px-4">
-          <div className="mx-auto max-w-4xl">
-            <div className="text-center mb-10">
-              <h2 className="text-2xl md:text-4xl font-black tracking-tight mb-3">Xem Demo trải nghiệm</h2>
-              <p className="text-muted-foreground text-base md:text-lg">Trải nghiệm trực tiếp quy trình tạo banner AI chỉ trong 60 giây.</p>
-            </div>
-            <div className="relative w-full aspect-video rounded-2xl overflow-hidden border border-foreground/10 shadow-2xl shadow-primary/10 bg-black">
-              <iframe
-                src="https://www.youtube.com/embed/dQw4w9WgXcQ?rel=0&modestbranding=1"
-                title="Banner Studio Pro - Demo"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                allowFullScreen
-                className="absolute inset-0 w-full h-full"
-              />
-            </div>
-            <p className="text-center mt-4 text-xs text-muted-foreground">💡 Thay thế bằng video demo thực tế của bạn bằng cách cập nhật YouTube Video ID</p>
           </div>
         </section>
 
