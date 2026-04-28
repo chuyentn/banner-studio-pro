@@ -1,7 +1,10 @@
 import { Outlet, Link, createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
 import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider } from "@/lib/auth-context";
+import { ThemeProvider } from "next-themes";
 import { Home, Wand2, History as HistoryIcon, Settings as SettingsIcon } from "lucide-react";
+import { useTranslation } from "react-i18next";
+import "../lib/i18n";
 
 import appCss from "../styles.css?url";
 
@@ -75,19 +78,21 @@ function RootShell({ children }: { children: React.ReactNode }) {
 }
 
 function RootComponent() {
+  const { t } = useTranslation();
   return (
-    <AuthProvider>
-      <div className="flex flex-col min-h-screen">
-        <div className="flex-1 pb-16 md:pb-0">
-          <Outlet />
-        </div>
+    <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
+      <AuthProvider>
+        <div className="flex flex-col min-h-screen">
+          <div className="flex-1 pb-16 md:pb-0">
+            <Outlet />
+          </div>
         
         {/* ── MOBILE NAV ──────────────────────────────────────────────────────── */}
-        <div className="fixed bottom-0 left-0 z-[100] flex w-full md:hidden mobile-nav-blur pb-safe">
+        <div className="fixed bottom-0 left-0 z-[100] flex w-full md:hidden mobile-nav-blur pb-safe border-t border-white/5 bg-background/80 backdrop-blur-xl">
           <div className="flex w-full items-center justify-around py-3 px-4">
             <Link to="/" className="mobile-nav-item" activeProps={{ className: "mobile-nav-item-active" }} inactiveProps={{ className: "mobile-nav-item-inactive" }}>
               <Home className="h-5 w-5" />
-              <span className="text-[9px] font-bold uppercase tracking-widest">Home</span>
+              <span className="text-[9px] font-bold uppercase tracking-widest">{t('nav.home')}</span>
             </Link>
             <Link to="/studio" className="mobile-nav-item" activeProps={{ className: "mobile-nav-item-active" }} inactiveProps={{ className: "mobile-nav-item-inactive" }}>
               <Wand2 className="h-5 w-5" />
@@ -95,16 +100,17 @@ function RootComponent() {
             </Link>
             <Link to="/history" className="mobile-nav-item" activeProps={{ className: "mobile-nav-item-active" }} inactiveProps={{ className: "mobile-nav-item-inactive" }}>
               <HistoryIcon className="h-5 w-5" />
-              <span className="text-[9px] font-bold uppercase tracking-widest">Lịch sử</span>
+              <span className="text-[9px] font-bold uppercase tracking-widest">{t('nav.history')}</span>
             </Link>
             <Link to="/settings" className="mobile-nav-item" activeProps={{ className: "mobile-nav-item-active" }} inactiveProps={{ className: "mobile-nav-item-inactive" }}>
               <SettingsIcon className="h-5 w-5" />
-              <span className="text-[9px] font-bold uppercase tracking-widest">Settings</span>
+              <span className="text-[9px] font-bold uppercase tracking-widest">{t('nav.settings')}</span>
             </Link>
           </div>
         </div>
       </div>
       <Toaster />
     </AuthProvider>
+    </ThemeProvider>
   );
 }

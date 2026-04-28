@@ -3,8 +3,10 @@ import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import {
   KeyRound, Zap, Cookie, Eye, EyeOff, Save, RotateCcw,
-  CheckCircle2, Settings2, LogOut, AlertTriangle, ShieldCheck, Loader2
+  CheckCircle2, Settings2, LogOut, AlertTriangle, ShieldCheck, Loader2, Moon, Sun
 } from "lucide-react";
+import { useTranslation } from "react-i18next";
+import { useTheme } from "next-themes";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -62,6 +64,8 @@ const TABS: TabDef[] = [
 
 function SettingsPage() {
   const { user, logout } = useAuth();
+  const { t, i18n } = useTranslation();
+  const { theme, setTheme } = useTheme();
 
   const [s, setS] = useState<ApiSettings>(loadApiSettings);
   const [showAdvanced, setShowAdvanced] = useState(false);
@@ -150,27 +154,34 @@ function SettingsPage() {
 
       {/* Header */}
       <header className="sticky top-0 z-50 border-b border-white/[0.07]"
-        style={{ background: "oklch(0.12 0.014 25 / 0.97)", backdropFilter: "blur(24px)" }}>
+        style={{ background: "var(--surface-glass-dark)", backdropFilter: "blur(24px)" }}>
         <div className="flex h-12 items-center justify-between px-3 md:px-5">
           <div className="flex items-center gap-2">
             <Link to="/" className="flex items-center gap-2 group transition-all">
               <div className="grid h-7 w-7 md:h-8 md:w-8 shrink-0 place-items-center rounded-xl transition-transform group-hover:scale-110"
-                style={{ background: "linear-gradient(135deg,oklch(0.55 0.25 280),oklch(0.45 0.25 290))", boxShadow: "0 0 16px oklch(0.55 0.25 280 / 0.4)" }}>
+                style={{ background: "linear-gradient(135deg,var(--primary),var(--brand-2))", boxShadow: "0 0 16px var(--primary)" }}>
                 <Settings2 className="h-3.5 w-3.5 md:h-4 md:w-4 text-white" />
               </div>
               <div className="hidden sm:block">
                 <div className="text-sm font-bold group-hover:text-primary transition-colors">Settings</div>
-                <div className="text-[9px] text-muted-foreground leading-none mt-0.5">Cấu hình kết nối API</div>
+                <div className="text-[9px] text-muted-foreground leading-none mt-0.5">{t('settings.subtitle').substring(0,25)}...</div>
               </div>
             </Link>
           </div>
           <nav className="flex items-center gap-0.5 rounded-xl border border-white/[0.08] bg-white/[0.04] p-0.5 md:p-1">
-            <Link to="/studio" className="rounded-lg px-3 md:px-5 py-1 md:py-1.5 text-[11px] md:text-[12px] font-medium text-muted-foreground hover:text-foreground hover:bg-white/[0.07] transition-all">✦ Studio</Link>
-            <Link to="/history" className="rounded-lg px-3 md:px-5 py-1 md:py-1.5 text-[11px] md:text-[12px] font-medium text-muted-foreground hover:text-foreground hover:bg-white/[0.07] transition-all">Lịch sử</Link>
+            <Link to="/studio" className="rounded-lg px-3 md:px-5 py-1 md:py-1.5 text-[11px] md:text-[12px] font-medium text-muted-foreground hover:text-foreground hover:bg-white/[0.07] transition-all">{t('nav.studio')}</Link>
+            <Link to="/history" className="rounded-lg px-3 md:px-5 py-1 md:py-1.5 text-[11px] md:text-[12px] font-medium text-muted-foreground hover:text-foreground hover:bg-white/[0.07] transition-all">{t('nav.history')}</Link>
             <Link to="/settings" className="rounded-lg px-3 md:px-5 py-1 md:py-1.5 text-[11px] md:text-[12px] font-bold transition-all"
-              style={{ background: "linear-gradient(135deg,oklch(0.55 0.25 280),oklch(0.45 0.25 290))", color: "white", boxShadow: "0 0 14px oklch(0.55 0.25 280 / 0.4)" }}>Settings</Link>
+              style={{ background: "linear-gradient(135deg,var(--primary),var(--brand-2))", color: "white", boxShadow: "0 0 14px var(--primary)" }}>{t('nav.settings')}</Link>
           </nav>
-          <div className="flex items-center w-10 md:w-[88px] justify-end">
+          
+          <div className="flex items-center gap-2 md:w-[140px] justify-end">
+            <button onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')} className="p-1.5 text-muted-foreground hover:text-foreground rounded-lg hover:bg-white/[0.08]">
+              {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+            </button>
+            <button onClick={() => i18n.changeLanguage(i18n.language === 'vi' ? 'en' : 'vi')} className="p-1.5 text-lg leading-none rounded-lg hover:bg-white/[0.08]">
+              {i18n.language === 'vi' ? '🇻🇳' : '🇬🇧'}
+            </button>
             {user && (
               <div className="flex items-center gap-1.5 border-l border-white/[0.08] pl-2">
                 <div className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-white/[0.08] text-[10px] font-bold text-foreground overflow-hidden">
@@ -198,10 +209,9 @@ function SettingsPage() {
             <ShieldCheck className="h-4 w-4" />
             <span className="text-[11px] font-bold tracking-widest uppercase">Secure Storage</span>
           </div>
-          <h1 className="text-2xl font-bold tracking-tight">Cấu hình API Chính thức</h1>
+          <h1 className="text-2xl font-bold tracking-tight">{t('settings.title')}</h1>
           <p className="mt-1 text-[13px] text-muted-foreground leading-relaxed">
-            Kết nối trực tiếp tới OpenAI hoặc Google Labs Flow. 
-            Hệ thống tự động đồng bộ Model và Endpoint tối ưu cho từng loại cổng.
+            {t('settings.subtitle')}
           </p>
         </div>
 
@@ -216,9 +226,9 @@ function SettingsPage() {
                     ? "border-primary/50 text-primary shadow-[0_0_30px_-10px_var(--primary)]"
                     : "border-white/[0.07] text-muted-foreground hover:border-white/[0.15] hover:text-foreground"
                 }`}
-                style={active ? { background: "oklch(0.16 0.022 25 / 0.95)" } : { background: "oklch(0.14 0.013 25 / 0.85)" }}>
+                style={active ? { background: "var(--surface-glass-light)" } : { background: "var(--surface-glass)" }}>
                 <div className={`grid h-10 w-10 place-items-center rounded-xl transition-all ${active ? "text-white" : ""}`}
-                  style={active ? { background: "linear-gradient(135deg,oklch(0.55 0.25 280),oklch(0.45 0.25 290))" } : { background: "rgba(255,255,255,0.06)" }}>
+                  style={active ? { background: "linear-gradient(135deg,var(--primary),var(--brand-2))" } : { background: "rgba(255,255,255,0.06)" }}>
                   {t.icon}
                 </div>
                 <div className="text-center">
@@ -232,7 +242,7 @@ function SettingsPage() {
 
         {/* ── TAB PANELS ────────────────────────────────────────────────── */}
         <div className="mt-4 rounded-3xl border border-white/[0.08] overflow-hidden shadow-2xl"
-          style={{ background: "oklch(0.15 0.014 25 / 0.9)", backdropFilter: "blur(20px)" }}>
+          style={{ background: "var(--surface-glass-light)", backdropFilter: "blur(20px)" }}>
 
           {/* ═══ TAB 1: API KEY (Official OpenAI) ═══════════════════════════ */}
           {mode === "apikey" && (

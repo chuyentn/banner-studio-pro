@@ -1,6 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Trash2, Download, ImageOff, History, LogOut } from "lucide-react";
+import { Trash2, Download, ImageOff, History, LogOut, Moon, Sun } from "lucide-react";
+import { useTranslation } from "react-i18next";
+import { useTheme } from "next-themes";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -36,6 +38,8 @@ export const Route = createFileRoute("/history")({
 
 function HistoryPage() {
   const { user, logout } = useAuth();
+  const { t, i18n } = useTranslation();
+  const { theme, setTheme } = useTheme();
 
   const [items, setItems] = useState<HistoryItem[]>([]);
 
@@ -70,27 +74,33 @@ function HistoryPage() {
 
       {/* Header — consistent with Studio/Settings */}
       <header className="sticky top-0 z-50 border-b border-white/[0.07]"
-        style={{ background: "oklch(0.12 0.014 25 / 0.97)", backdropFilter: "blur(24px)" }}>
+        style={{ background: "var(--surface-glass-dark)", backdropFilter: "blur(24px)" }}>
         <div className="flex h-12 items-center justify-between px-3 md:px-5">
           <div className="flex items-center gap-2">
             <Link to="/" className="flex items-center gap-2 group transition-all">
               <div className="grid h-7 w-7 md:h-8 md:w-8 shrink-0 place-items-center rounded-xl transition-transform group-hover:scale-110"
-                style={{ background: "linear-gradient(135deg,oklch(0.55 0.25 280),oklch(0.45 0.25 290))", boxShadow: "0 0 16px oklch(0.55 0.25 280 / 0.4)" }}>
+                style={{ background: "linear-gradient(135deg,var(--primary),var(--brand-2))", boxShadow: "0 0 16px var(--primary)" }}>
                 <History className="h-3.5 w-3.5 md:h-4 md:w-4 text-white" />
               </div>
               <div className="hidden sm:block">
-                <div className="text-sm font-bold group-hover:text-primary transition-colors">Lịch sử</div>
+                <div className="text-sm font-bold group-hover:text-primary transition-colors">{t('nav.history')}</div>
                 <div className="text-[9px] text-muted-foreground leading-none mt-0.5">Tối đa 30 lần gần nhất</div>
               </div>
             </Link>
           </div>
           <nav className="flex items-center gap-0.5 rounded-xl border border-white/[0.08] bg-white/[0.04] p-0.5 md:p-1">
-            <Link to="/studio" className="rounded-lg px-3 md:px-5 py-1 md:py-1.5 text-[11px] md:text-[12px] font-medium text-muted-foreground hover:text-foreground hover:bg-white/[0.07] transition-all">✦ Studio</Link>
+            <Link to="/studio" className="rounded-lg px-3 md:px-5 py-1 md:py-1.5 text-[11px] md:text-[12px] font-medium text-muted-foreground hover:text-foreground hover:bg-white/[0.07] transition-all">{t('nav.studio')}</Link>
             <Link to="/history" className="rounded-lg px-3 md:px-5 py-1 md:py-1.5 text-[11px] md:text-[12px] font-bold transition-all"
-              style={{ background: "linear-gradient(135deg,oklch(0.55 0.25 280),oklch(0.45 0.25 290))", color: "white", boxShadow: "0 0 14px oklch(0.55 0.25 280 / 0.4)" }}>Lịch sử</Link>
-            <Link to="/settings" className="rounded-lg px-3 md:px-5 py-1 md:py-1.5 text-[11px] md:text-[12px] font-medium text-muted-foreground hover:text-foreground hover:bg-white/[0.07] transition-all">Settings</Link>
+              style={{ background: "linear-gradient(135deg,var(--primary),var(--brand-2))", color: "white", boxShadow: "0 0 14px var(--primary)" }}>{t('nav.history')}</Link>
+            <Link to="/settings" className="rounded-lg px-3 md:px-5 py-1 md:py-1.5 text-[11px] md:text-[12px] font-medium text-muted-foreground hover:text-foreground hover:bg-white/[0.07] transition-all">{t('nav.settings')}</Link>
           </nav>
-          <div className="flex items-center w-10 md:w-[88px] justify-end">
+          <div className="flex items-center gap-2 md:w-[140px] justify-end">
+            <button onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')} className="p-1.5 text-muted-foreground hover:text-foreground rounded-lg hover:bg-white/[0.08] hidden sm:block">
+              {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+            </button>
+            <button onClick={() => i18n.changeLanguage(i18n.language === 'vi' ? 'en' : 'vi')} className="p-1.5 text-lg leading-none rounded-lg hover:bg-white/[0.08] hidden sm:block">
+              {i18n.language === 'vi' ? '🇻🇳' : '🇬🇧'}
+            </button>
             {user && (
               <div className="flex items-center gap-1.5 border-l border-white/[0.08] pl-2">
                 <div className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-white/[0.08] text-[10px] font-bold text-foreground overflow-hidden"
@@ -146,7 +156,7 @@ function HistoryPage() {
 
         {items.length === 0 ? (
           <div className="grid place-items-center rounded-xl border border-dashed border-white/[0.08] py-16 md:py-20"
-            style={{ background: "oklch(0.16 0.014 25 / 0.6)" }}>
+            style={{ background: "var(--surface-glass)" }}>
             <div className="text-center px-4">
               <ImageOff className="mx-auto mb-3 h-8 w-8 text-muted-foreground/50" />
               <div className="text-sm font-medium">Chưa có banner nào</div>
@@ -161,7 +171,7 @@ function HistoryPage() {
               <div
                 key={it.id}
                 className="rounded-xl border border-white/[0.08] p-3 md:p-4"
-                style={{ background: "oklch(0.16 0.014 25 / 0.8)", backdropFilter: "blur(12px)" }}
+                style={{ background: "var(--surface-glass-dark)", backdropFilter: "blur(12px)" }}
               >
                 <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
                   <div className="min-w-0">

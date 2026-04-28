@@ -17,7 +17,11 @@ import {
   Zap,
   Cookie,
   LogOut,
+  Sun,
+  Moon
 } from "lucide-react";
+import { useTranslation } from "react-i18next";
+import { useTheme } from "next-themes";
 
 
 import { ImageDropzone } from "@/components/ImageDropzone";
@@ -86,6 +90,8 @@ const MAX_VARIATIONS = STYLE_VARIANTS.length;
 
 function StudioPage() {
   const { user, logout } = useAuth();
+  const { t, i18n } = useTranslation();
+  const { theme, setTheme } = useTheme();
 
   const [settings, setSettings] = useState<ApiSettings>(loadApiSettings);
   const [inspiration, setInspiration] = useState<string[]>([]);
@@ -117,6 +123,7 @@ function StudioPage() {
     Array.from({ length: 5 }, () => ({ status: "idle" }) as SlotState),
   );
   const [running, setRunning] = useState(false);
+  const [showAdvanced, setShowAdvanced] = useState(false);
   const importRef = useRef<HTMLInputElement>(null);
 
   const setVariantPrompt = (idx: number, val: string) =>
@@ -392,23 +399,23 @@ function StudioPage() {
 
       {/* ═══ FIXED HEADER ═══════════════════════════════════════════════════ */}
       <header className="sticky top-0 z-50 border-b border-white/[0.07]"
-        style={{ background: "oklch(0.12 0.014 25 / 0.97)", backdropFilter: "blur(24px)" }}>
+        style={{ background: "var(--surface-glass-dark)", backdropFilter: "blur(24px)" }}>
         <div className="flex h-12 shrink-0 items-center justify-between px-3 md:px-5">
           {/* Logo */}
           <div className="flex items-center gap-2 min-w-0">
             <Link to="/" className="flex items-center gap-2 group transition-all">
               <div className="grid h-7 w-7 md:h-8 md:w-8 shrink-0 place-items-center rounded-xl transition-transform group-hover:scale-110"
-                style={{ background: "linear-gradient(135deg,oklch(0.55 0.25 280),oklch(0.45 0.25 290))", boxShadow: "0 0 16px oklch(0.55 0.25 280 / 0.5)" }}>
+                style={{ background: "linear-gradient(135deg,var(--primary),var(--brand-2))", boxShadow: "0 0 16px var(--primary)" }}>
                 <Sparkles className="h-3.5 w-3.5 md:h-4 md:w-4 text-white" />
               </div>
               <div className="hidden sm:block">
-                <div className="text-sm font-bold tracking-tight leading-none group-hover:text-primary transition-colors">Banner Studio</div>
-                <div className="text-[9px] text-muted-foreground leading-none mt-0.5">GPT Image · Coach.io.vn</div>
+                <div className="text-sm font-bold tracking-tight leading-none group-hover:text-primary transition-colors">{t('studio.app_title')}</div>
+                <div className="text-[9px] text-muted-foreground leading-none mt-0.5">{t('studio.app_subtitle')}</div>
               </div>
             </Link>
             <div className="hidden md:flex items-center gap-6 ml-8 border-l border-white/[0.08] pl-8">
-              <Link to="/" className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground hover:text-white transition-colors">Trang chủ</Link>
-              <Link to="/pricing" className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground hover:text-white transition-colors">Bảng giá</Link>
+              <Link to="/" className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground hover:text-white transition-colors">{t('nav.home')}</Link>
+              <Link to="/pricing" className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground hover:text-white transition-colors">{t('nav.pricing')}</Link>
             </div>
             <span className="badge-ai ml-1 hidden sm:inline">AI</span>
 
@@ -416,12 +423,12 @@ function StudioPage() {
             {isApiReady ? (
               <span className="ml-1.5 hidden sm:flex items-center gap-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 text-[9px] font-bold text-emerald-400 uppercase tracking-wider" title="Hệ thống đã sẵn sàng">
                 <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                Live
+                {t('studio.status_live')}
               </span>
             ) : (
               <a href="/settings" className="ml-1.5 hidden sm:flex items-center gap-1 rounded-full bg-destructive/10 border border-destructive/20 px-2 py-0.5 text-[9px] font-bold text-destructive uppercase tracking-wider hover:bg-destructive/20 transition-colors" title="Bấm vào để cấu hình">
                 <span className="h-1.5 w-1.5 rounded-full bg-destructive" />
-                Thiếu API
+                {t('studio.status_no_api')}
               </a>
             )}
           </div>
@@ -430,22 +437,28 @@ function StudioPage() {
           <nav className="flex items-center gap-0.5 rounded-xl border border-white/[0.08] bg-white/[0.04] p-0.5 md:p-1">
             <Link to="/studio"
               className="rounded-lg px-3 md:px-5 py-1 md:py-1.5 text-[11px] md:text-[12px] font-bold transition-all"
-              style={{ background: "linear-gradient(135deg,oklch(0.55 0.25 280),oklch(0.45 0.25 290))", color: "white", boxShadow: "0 0 14px oklch(0.55 0.25 280 / 0.45)" }}>
-              ✦ Studio
+              style={{ background: "linear-gradient(135deg,var(--primary),var(--brand-2))", color: "white", boxShadow: "0 0 14px var(--primary)" }}>
+              {t('nav.studio')}
             </Link>
             <Link to="/history"
               className="rounded-lg px-3 md:px-5 py-1 md:py-1.5 text-[11px] md:text-[12px] font-medium text-muted-foreground hover:text-foreground hover:bg-white/[0.07] transition-all">
-              Lịch sử
+              {t('nav.history')}
             </Link>
             <Link to="/settings"
               className="rounded-lg px-3 md:px-5 py-1 md:py-1.5 text-[11px] md:text-[12px] font-medium text-muted-foreground hover:text-foreground hover:bg-white/[0.07] transition-all">
-              Settings
+              {t('nav.settings')}
             </Link>
           </nav>
 
           {/* Right actions */}
           <div className="flex items-center gap-1.5 md:gap-2">
-            <Button variant="glow" size="sm" onClick={() => importRef.current?.click()} className="h-7 text-[10px] md:text-[11px] gap-1 md:gap-1.5 px-2 md:px-3">
+            <button onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')} className="p-1.5 text-muted-foreground hover:text-foreground rounded-lg hover:bg-white/[0.08] hidden sm:block">
+              {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+            </button>
+            <button onClick={() => i18n.changeLanguage(i18n.language === 'vi' ? 'en' : 'vi')} className="p-1.5 text-lg leading-none rounded-lg hover:bg-white/[0.08] hidden sm:block">
+              {i18n.language === 'vi' ? '🇻🇳' : '🇬🇧'}
+            </button>
+            <Button variant="glow" size="sm" onClick={() => importRef.current?.click()} className="h-7 text-[10px] md:text-[11px] gap-1 md:gap-1.5 px-2 md:px-3 ml-2">
               <Upload className="h-3 w-3 md:h-3.5 md:w-3.5" /> <span className="hidden sm:inline">Import</span>
             </Button>
             <Button variant="glow" size="sm" onClick={exportJson} className="h-7 text-[10px] md:text-[11px] gap-1 md:gap-1.5 px-2 md:px-3">
@@ -551,10 +564,15 @@ function StudioPage() {
               />
             </div>
 
-            {/* ── Logo & KOL Placement Controls ── */}
+            {/* ── Logo & KOL Placement Controls (Basic + Advanced Toggle) ── */}
             {(brandLogo.length > 0 || kolAvatar.length > 0) && (
-              <div className="mt-3 rounded-xl border border-white/[0.08] p-3 space-y-3" style={{ background: "oklch(0.14 0.014 25 / 0.6)" }}>
-                <span className="text-[9px] font-bold uppercase tracking-[0.18em] text-primary/80">⚙ Bố cục Logo & KOL</span>
+              <div className="mt-3 rounded-xl border border-white/[0.08] p-3 space-y-3" style={{ background: "var(--surface-glass)" }}>
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-primary/80">⚙ Bố cục Logo & KOL</span>
+                  <Button variant="ghost" size="sm" onClick={() => setShowAdvanced(!showAdvanced)} className="h-6 text-[10px] md:text-[11px] text-muted-foreground">
+                    {showAdvanced ? "Thu gọn" : "Nâng cao"}
+                  </Button>
+                </div>
 
                 {brandLogo.length > 0 && (
                   <div className="space-y-2">
@@ -584,37 +602,41 @@ function StudioPage() {
                           })()}
                         </div>
                       </div>
-                      {/* Size */}
-                      <div>
-                        <span className="text-[9px] text-muted-foreground/60 block mb-1">Kích thước</span>
-                        <Select value={logoSize} onValueChange={(v) => setLogoSize(v as LogoSize)}>
-                          <SelectTrigger className="h-7 text-[10px] bg-white/[0.04] border-white/[0.08]"><SelectValue /></SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="small">Nhỏ</SelectItem>
-                            <SelectItem value="medium">Vừa</SelectItem>
-                            <SelectItem value="large">Lớn</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      {/* Opacity */}
-                      <div>
-                        <span className="text-[9px] text-muted-foreground/60 block mb-1">Opacity {logoOpacity}%</span>
-                        <input type="range" min={10} max={100} step={10} value={logoOpacity}
-                          onChange={(e) => setLogoOpacity(Number(e.target.value))}
-                          className="w-full accent-[var(--primary)] h-1" />
-                      </div>
+                      {showAdvanced && (
+                        <>
+                          {/* Size */}
+                          <div>
+                            <span className="text-[11px] text-muted-foreground/80 block mb-1">Kích thước</span>
+                            <Select value={logoSize} onValueChange={(v) => setLogoSize(v as LogoSize)}>
+                              <SelectTrigger className="h-10 sm:h-8 text-xs bg-white/[0.04] border-white/[0.08]"><SelectValue /></SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="small">Nhỏ</SelectItem>
+                                <SelectItem value="medium">Vừa</SelectItem>
+                                <SelectItem value="large">Lớn</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          {/* Opacity */}
+                          <div>
+                            <span className="text-[11px] text-muted-foreground/80 block mb-1">Opacity {logoOpacity}%</span>
+                            <input type="range" min={10} max={100} step={10} value={logoOpacity}
+                              onChange={(e) => setLogoOpacity(Number(e.target.value))}
+                              className="w-full accent-[var(--primary)] h-1" />
+                          </div>
+                        </>
+                      )}
                     </div>
                   </div>
                 )}
 
                 {kolAvatar.length > 0 && (
                   <div className="space-y-2">
-                    <span className="text-[10px] font-semibold text-muted-foreground">KOL / Đại sứ</span>
+                    <span className="text-[11px] font-semibold text-muted-foreground">KOL / Đại sứ</span>
                     <div className="grid grid-cols-2 gap-2">
                       <div>
-                        <span className="text-[9px] text-muted-foreground/60 block mb-1">Vị trí</span>
+                        <span className="text-[11px] text-muted-foreground/80 block mb-1">Vị trí</span>
                         <Select value={kolPosition} onValueChange={(v) => setKolPosition(v as KolPosition)}>
-                          <SelectTrigger className="h-7 text-[10px] bg-white/[0.04] border-white/[0.08]"><SelectValue /></SelectTrigger>
+                          <SelectTrigger className="h-10 sm:h-8 text-xs bg-white/[0.04] border-white/[0.08]"><SelectValue /></SelectTrigger>
                           <SelectContent>
                             <SelectItem value="left">← Trái</SelectItem>
                             <SelectItem value="center">◉ Giữa</SelectItem>
@@ -622,18 +644,20 @@ function StudioPage() {
                           </SelectContent>
                         </Select>
                       </div>
-                      <div>
-                        <span className="text-[9px] text-muted-foreground/60 block mb-1">Khung hình</span>
-                        <Select value={kolFraming} onValueChange={(v) => setKolFraming(v as KolFraming)}>
-                          <SelectTrigger className="h-7 text-[10px] bg-white/[0.04] border-white/[0.08]"><SelectValue /></SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="auto">Auto — AI chọn</SelectItem>
-                            <SelectItem value="full-body">Toàn thân</SelectItem>
-                            <SelectItem value="upper-body">Bán thân</SelectItem>
-                            <SelectItem value="face">Khuôn mặt</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
+                      {showAdvanced && (
+                        <div>
+                          <span className="text-[11px] text-muted-foreground/80 block mb-1">Khung hình</span>
+                          <Select value={kolFraming} onValueChange={(v) => setKolFraming(v as KolFraming)}>
+                            <SelectTrigger className="h-10 sm:h-8 text-xs bg-white/[0.04] border-white/[0.08]"><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="auto">Auto — AI chọn</SelectItem>
+                              <SelectItem value="full-body">Toàn thân</SelectItem>
+                              <SelectItem value="upper-body">Bán thân</SelectItem>
+                              <SelectItem value="face">Khuôn mặt</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      )}
                     </div>
                   </div>
                 )}
@@ -642,67 +666,82 @@ function StudioPage() {
           </div>
           {/* Col 2: Brand + Prompt */}
           <div className="space-y-1.5">
-            <label className="text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground">Thương hiệu</label>
+            <label className="text-[11px] font-bold uppercase tracking-[0.15em] text-muted-foreground">Thương hiệu</label>
             <Input placeholder="NovaSkin, Acme Coffee…" value={brand} onChange={(e) => setBrand(e.target.value)}
-              className="h-9 text-xs bg-white/[0.04] border-white/[0.08]" />
-            <label className="mt-2 block text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground">Prompt tuỳ chọn</label>
-            <Textarea
-              placeholder='VD: "nền be, mood mùa thu, không logo"…'
-              value={prompt}
-              onChange={(e) => setPrompt(e.target.value)}
-              rows={2}
-              className="resize-none text-xs bg-white/[0.04] border-white/[0.08] placeholder:text-muted-foreground/40"
-            />
+              className="h-10 sm:h-9 text-xs bg-white/[0.04] border-white/[0.08]" />
+            {showAdvanced && (
+              <>
+                <label className="mt-2 block text-[11px] font-bold uppercase tracking-[0.15em] text-muted-foreground">Prompt tuỳ chọn</label>
+              <Textarea
+                placeholder='VD: "nền be, mood mùa thu, không logo"…'
+                value={prompt}
+                onChange={(e) => setPrompt(e.target.value)}
+                rows={2}
+                className="resize-none text-xs bg-white/[0.04] border-white/[0.08] placeholder:text-muted-foreground/40"
+              />
+              </>
+            )}
           </div>
-          {/* Col 3: Typography + Ratio + Quality + Variations */}
+          {/* Col 3: Ratio + Advanced Settings */}
           <div className="space-y-2.5">
-            <div>
-              <label className="text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground">Typography</label>
-              <Select value={typographyId} onValueChange={setTypographyId}>
-                <SelectTrigger className="mt-1 h-8 text-xs bg-white/[0.04] border-white/[0.08]"><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value={AUTO_TYPO_ID}>Auto — AI tự chọn</SelectItem>
-                  {TYPO_CATEGORIES.map((c) => <SelectItem key={c.id} value={c.id}>{c.label}</SelectItem>)}
-                </SelectContent>
-              </Select>
-            </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               <div>
-                <label className="text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground">Tỷ lệ</label>
+                <label className="text-[11px] font-bold uppercase tracking-[0.15em] text-muted-foreground">Tỷ lệ</label>
                 <Select value={ratio} onValueChange={handleRatioChange}>
-                  <SelectTrigger className="mt-1 h-8 text-xs bg-white/[0.04] border-white/[0.08]"><SelectValue /></SelectTrigger>
+                  <SelectTrigger className="mt-1 h-10 sm:h-8 text-xs bg-white/[0.04] border-white/[0.08]"><SelectValue /></SelectTrigger>
                   <SelectContent>
                     {(Object.keys(RATIO_LABELS) as Ratio[]).map((r) => <SelectItem key={r} value={r}>{RATIO_LABELS[r]}</SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>
-              <div>
-                <label className="text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground flex items-center gap-1">
-                  Chất lượng {allowedQualities.length < 3 && <span className="text-[8px] text-primary normal-case">(hạn chế)</span>}
-                </label>
-                <Select value={quality} onValueChange={(v) => setQuality(v as Quality)}>
-                  <SelectTrigger className="mt-1 h-8 text-xs bg-white/[0.04] border-white/[0.08]"><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    {(Object.keys(QUALITY_LABELS) as Quality[]).map((q) => (
-                      <SelectItem key={q} value={q} disabled={!allowedQualities.includes(q)}>{QUALITY_LABELS[q]}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+              {showAdvanced && (
+                <div>
+                  <label className="text-[11px] font-bold uppercase tracking-[0.15em] text-muted-foreground flex items-center gap-1">
+                    Chất lượng {allowedQualities.length < 3 && <span className="text-[10px] text-primary normal-case">(hạn chế)</span>}
+                  </label>
+                  <Select value={quality} onValueChange={(v) => setQuality(v as Quality)}>
+                    <SelectTrigger className="mt-1 h-10 sm:h-8 text-xs bg-white/[0.04] border-white/[0.08]"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      {(Object.keys(QUALITY_LABELS) as Quality[]).map((q) => (
+                        <SelectItem key={q} value={q} disabled={!allowedQualities.includes(q)}>{QUALITY_LABELS[q]}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
             </div>
-            <div>
-              <label className="text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground flex justify-between">
-                Số phong cách <span className="text-foreground font-bold">{variations}</span>
-              </label>
-              <input type="range" min={1} max={MAX_VARIATIONS} value={variations}
-                onChange={(e) => setVariations(Number(e.target.value))}
-                className="mt-1 w-full accent-[var(--primary)]" />
-            </div>
+            {showAdvanced && (
+              <>
+                <div className="mt-2">
+                  <label className="text-[11px] font-bold uppercase tracking-[0.15em] text-muted-foreground">Typography</label>
+                  <Select value={typographyId} onValueChange={setTypographyId}>
+                    <SelectTrigger className="mt-1 h-10 sm:h-8 text-xs bg-white/[0.04] border-white/[0.08]"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value={AUTO_TYPO_ID}>Auto — AI tự chọn</SelectItem>
+                      {TYPO_CATEGORIES.map((c) => <SelectItem key={c.id} value={c.id}>{c.label}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="mt-2">
+                  <label className="text-[11px] font-bold uppercase tracking-[0.15em] text-muted-foreground flex justify-between">
+                    Số phong cách <span className="text-foreground font-bold">{variations}</span>
+                  </label>
+                  <input type="range" min={1} max={MAX_VARIATIONS} value={variations}
+                    onChange={(e) => setVariations(Number(e.target.value))}
+                    className="mt-1 w-full accent-[var(--primary)]" />
+                </div>
+              </>
+            )}
+            {!showAdvanced && (
+              <Button variant="ghost" className="w-full text-xs text-muted-foreground h-10 border border-dashed border-white/10 mt-2" onClick={() => setShowAdvanced(true)}>
+                Hiển thị tùy chọn nâng cao
+              </Button>
+            )}
           </div>
         </section>
 
         {/* ── GENERATE BUTTON ──────────────────────────────────────────────── */}
-        <section className="mt-5">
+        <section className="mt-5 sticky bottom-4 sm:static z-40 bg-background/80 sm:bg-transparent backdrop-blur-xl sm:backdrop-blur-none p-3 sm:p-0 rounded-3xl sm:rounded-none border border-white/10 sm:border-transparent shadow-2xl sm:shadow-none">
           <button
             className="btn-generate w-full rounded-2xl py-4 text-[15px] font-bold text-white flex items-center justify-center gap-3 disabled:cursor-not-allowed disabled:opacity-50"
             disabled={!canGenerate}
@@ -799,11 +838,11 @@ function ResultCard({ title, hint, ratio, slot, index, variantPrompt, onVariantP
     : "aspect-[3/4]";
 
   return (
-    <div className="result-card flex flex-col rounded-xl border border-white/[0.08] overflow-hidden" style={{background:"oklch(0.16 0.014 25 / 0.9)", backdropFilter:"blur(12px)"}}>
+    <div className="result-card flex flex-col rounded-xl border border-white/[0.08] overflow-hidden" style={{background:"var(--surface-glass-light)", backdropFilter:"blur(12px)"}}>
       {/* Card header */}
       <div className="flex items-center justify-between px-3 py-2 border-b border-white/[0.06]">
         <div className="flex items-center gap-1.5 min-w-0">
-          <span className="grid h-5 w-5 shrink-0 place-items-center rounded-md text-[10px] font-bold" style={{background:"linear-gradient(135deg,oklch(0.55 0.25 280),oklch(0.45 0.25 290))", color:"white"}}>{index}</span>
+          <span className="grid h-5 w-5 shrink-0 place-items-center rounded-md text-[10px] font-bold" style={{background:"linear-gradient(135deg,var(--primary),var(--brand-2))", color:"white"}}>{index}</span>
           <span className="truncate text-[11px] font-semibold">{title}</span>
         </div>
         <StatusPill slot={slot} />
@@ -834,9 +873,11 @@ function ResultCard({ title, hint, ratio, slot, index, variantPrompt, onVariantP
             <div className="text-center text-[10px] text-muted-foreground line-clamp-3">{slot.message}</div>
           </div>
         ) : (
-          <div className="absolute inset-0 flex flex-col items-center justify-center gap-1.5 text-muted-foreground/40">
-            <ImageIcon className="h-8 w-8" />
-            <div className="text-[10px]">Chưa có ảnh</div>
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-1.5 opacity-30">
+            <div className="grid h-10 w-10 place-items-center rounded-full bg-white/[0.05] border border-white/10">
+              <ImageIcon className="h-4 w-4 text-muted-foreground" />
+            </div>
+            <div className="text-[11px] font-medium text-muted-foreground tracking-wide mt-1">Sẵn sàng</div>
           </div>
         )}
       </div>
