@@ -63,9 +63,9 @@ function LandingPage() {
             </Link>
           </div>
           <div className="hidden md:flex items-center gap-10 text-[12px] font-bold uppercase tracking-wider text-muted-foreground">
-            <a href="#features" className="hover:text-foreground transition-colors">Tính năng</a>
-            <a href="#pricing" className="hover:text-foreground transition-colors">Bảng giá</a>
-            <a href="#testimonials" className="hover:text-foreground transition-colors">Khách hàng</a>
+            <a href="#features" className="hover:text-foreground transition-colors">{t('nav.features')}</a>
+            <a href="#pricing" className="hover:text-foreground transition-colors">{t('nav.pricing')}</a>
+            <a href="#testimonials" className="hover:text-foreground transition-colors">{t('nav.customers')}</a>
           </div>
           <div className="flex items-center gap-3">
             {/* Toggles */}
@@ -85,11 +85,11 @@ function LandingPage() {
 
             {/* CTAs */}
             <Link to="/login" className="hidden sm:block">
-              <Button variant="ghost" className="font-bold">Đăng nhập</Button>
+              <Button variant="ghost" className="font-bold">{t('nav.login')}</Button>
             </Link>
             <Link to="/studio">
               <Button variant="glow" className="font-bold bg-primary hover:bg-primary/90 text-white rounded-lg shadow-lg shadow-primary/20">
-                Dùng thử miễn phí
+                {t('nav.try_free')}
               </Button>
             </Link>
           </div>
@@ -107,23 +107,23 @@ function LandingPage() {
               {/* Left: Text */}
               <div className="animate-in fade-in slide-in-from-bottom-8 duration-1000">
                 <h1 className="text-4xl md:text-5xl lg:text-6xl font-black tracking-tight leading-[1.1] mb-6">
-                  Sản xuất banner quảng cáo{" "}
-                  <span className="text-primary shimmer-text">tự động hoàn toàn</span>
+                  {t('landing.hero_title_1')}{" "}
+                  <span className="text-primary shimmer-text">{t('landing.hero_title_2')}</span>
                 </h1>
                 
                 <p className="max-w-xl text-base md:text-lg text-muted-foreground font-medium mb-8 leading-relaxed">
-                  Từ 1 ảnh sản phẩm đến hàng nghìn banner đa phong cách. Không cần thiết kế, tối ưu CTR với AI. Không cần thẻ tín dụng.
+                  {t('landing.hero_desc')}
                 </p>
                 
                 <div className="flex flex-col sm:flex-row gap-3 mb-6">
                   <Link to="/studio" className="w-full sm:w-auto">
                     <Button size="lg" className="w-full sm:w-auto h-14 px-8 text-base font-bold rounded-xl bg-primary hover:bg-primary/90 text-white shadow-xl shadow-primary/25 transition-all hover:scale-105 active:scale-95">
-                      Bắt đầu miễn phí
+                      {t('landing.cta_start')}
                     </Button>
                   </Link>
                   <a href="https://cal.com/victorchuyen/coachai" target="_blank" rel="noreferrer" className="w-full sm:w-auto">
                     <Button variant="outline" size="lg" className="w-full sm:w-auto h-14 px-8 text-base font-bold rounded-xl border-foreground/10 hover:bg-foreground/5 transition-all">
-                      <Calendar className="h-5 w-5 mr-2" /> Đặt lịch tư vấn
+                      <Calendar className="h-5 w-5 mr-2" /> {t('landing.cta_consult')}
                     </Button>
                   </a>
                 </div>
@@ -131,10 +131,10 @@ function LandingPage() {
                 {/* Quick links */}
                 <div className="flex flex-wrap gap-3 mb-6">
                   <a href="https://github.com/tncsharetool" target="_blank" rel="noreferrer" className="flex items-center gap-1.5 text-xs font-bold text-muted-foreground px-3 py-2 rounded-lg border border-foreground/10 hover:border-primary/40 hover:text-foreground transition-all">
-                    <Github className="h-3.5 w-3.5" /> GitHub Source
+                    <Github className="h-3.5 w-3.5" /> {t('landing.github_source')}
                   </a>
                   <a href="#features" className="flex items-center gap-1.5 text-xs font-bold text-muted-foreground px-3 py-2 rounded-lg border border-foreground/10 hover:border-primary/40 hover:text-foreground transition-all">
-                    <Play className="h-3.5 w-3.5" /> Xem tính năng
+                    <Play className="h-3.5 w-3.5" /> {t('landing.view_features')}
                   </a>
                 </div>
 
@@ -163,7 +163,7 @@ function LandingPage() {
                   </div>
                   <div className="flex items-center gap-2 px-4 py-3 border-t border-foreground/10 bg-background/60 backdrop-blur-sm">
                     <Play className="h-4 w-4 text-primary" />
-                    <span className="text-[11px] text-muted-foreground font-semibold">Demo: Tạo hàng loạt banner quảng cáo trong 60 giây với AI</span>
+                    <span className="text-[11px] text-muted-foreground font-semibold">{t('landing.video_caption')}</span>
                   </div>
                 </div>
               </div>
@@ -172,10 +172,10 @@ function LandingPage() {
             {/* Stats bar */}
             <div className="flex justify-center gap-12 md:gap-20 flex-wrap mt-16 pt-10 border-t border-foreground/5">
               {[
-                { num: "5+", label: "AI Models" },
-                { num: "7", label: "Công cụ sáng tạo" },
-                { num: "24/7", label: "Cloud Platform" },
-                { num: "0đ", label: "Bắt đầu miễn phí" },
+                { num: "5+", label: t('landing.stat_models') },
+                { num: "7", label: t('landing.stat_tools') },
+                { num: "24/7", label: t('landing.stat_cloud') },
+                { num: "0đ", label: t('landing.stat_free') },
               ].map((s, i) => (
                 <div key={i} className="text-center">
                   <div className="text-3xl md:text-4xl font-black text-foreground">{s.num}</div>
@@ -190,41 +190,41 @@ function LandingPage() {
         <section id="features" className="py-20 md:py-32 bg-foreground/[0.02] border-y border-foreground/5 relative">
           <div className="mx-auto max-w-7xl px-6">
             <div className="text-center mb-16 md:mb-24">
-              <h2 className="text-3xl md:text-5xl font-black tracking-tight mb-4">Mọi thứ bạn cần để scale chiến dịch</h2>
-              <p className="text-muted-foreground text-lg max-w-2xl mx-auto">Hệ thống sản xuất hình ảnh hàng loạt nhanh nhất thị trường.</p>
+              <h2 className="text-3xl md:text-5xl font-black tracking-tight mb-4">{t('landing.features_title')}</h2>
+              <p className="text-muted-foreground text-lg max-w-2xl mx-auto">{t('landing.features_desc')}</p>
             </div>
  
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-12">
               {[
                 {
                   icon: <Zap className="h-6 w-6 text-primary" />,
-                  title: "Sản xuất batch lớn",
-                  desc: "Xử lý hàng nghìn yêu cầu cùng lúc. Nhận về đa dạng kích thước, bố cục trong vòng vài giây mà không cần can thiệp thủ công."
+                  title: t('landing.feat_batch_title'),
+                  desc: t('landing.feat_batch_desc')
                 },
                 {
                   icon: <ShieldCheck className="h-6 w-6 text-primary" />,
-                  title: "Brand Consistency",
-                  desc: "Tự động chèn Logo, định hình KOL và bộ nhận diện thương hiệu một cách hoàn hảo trên từng khung hình."
+                  title: t('landing.feat_brand_title'),
+                  desc: t('landing.feat_brand_desc')
                 },
                 {
                   icon: <Layers className="h-6 w-6 text-primary" />,
-                  title: "Tối ưu hóa A/B Testing",
-                  desc: "Tạo ra vô số biến thể để test quảng cáo. Tiết kiệm hàng tuần làm việc của designer, tự động tìm ra mẫu tối ưu CTR."
+                  title: t('landing.feat_ab_title'),
+                  desc: t('landing.feat_ab_desc')
                 },
                 {
                   icon: <ImageIcon className="h-6 w-6 text-primary" />,
-                  title: "Chất lượng In ấn 4K",
-                  desc: "File đầu ra siêu nét, chi tiết từng pixel. Sử dụng tốt cho cả định dạng Digital và các chiến dịch in ấn OOH cỡ lớn."
+                  title: t('landing.feat_4k_title'),
+                  desc: t('landing.feat_4k_desc')
                 },
                 {
                   icon: <Star className="h-6 w-6 text-primary" />,
-                  title: "AI Style Transfer",
-                  desc: "Phân tích phong cách từ ảnh mẫu và áp dụng chuẩn xác vibe đó vào sản phẩm của bạn. Duy trì nghệ thuật thị giác."
+                  title: t('landing.feat_style_title'),
+                  desc: t('landing.feat_style_desc')
                 },
                 {
                   icon: <Wand2 className="h-6 w-6 text-primary" />,
-                  title: "Prompt thông minh",
-                  desc: "Được tích hợp sẵn hệ thống prompt tối ưu. Chỉ cần nhập mô tả sản phẩm, AI sẽ tự dàn xếp bố cục đẹp nhất."
+                  title: t('landing.feat_prompt_title'),
+                  desc: t('landing.feat_prompt_desc')
                 }
               ].map((f, i) => (
                 <div key={i} className="group p-8 rounded-3xl border border-foreground/5 bg-background hover:border-primary/30 transition-all duration-300 shadow-sm hover:shadow-xl hover:shadow-primary/5">
@@ -243,36 +243,36 @@ function LandingPage() {
         <section id="testimonials" className="py-20 md:py-32">
           <div className="mx-auto max-w-7xl px-6">
             <div className="text-center mb-16 md:mb-24">
-              <h2 className="text-3xl md:text-5xl font-black tracking-tight mb-4">Khách hàng nói gì?</h2>
-              <p className="text-muted-foreground text-lg max-w-2xl mx-auto">Hơn 500+ doanh nghiệp và cá nhân đang sử dụng Banner Studio hàng ngày.</p>
+              <h2 className="text-3xl md:text-5xl font-black tracking-tight mb-4">{t('landing.testimonials_title')}</h2>
+              <p className="text-muted-foreground text-lg max-w-2xl mx-auto">{t('landing.testimonials_desc')}</p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               {[
                 {
-                  name: "Anh Nguyễn Văn Tùng",
-                  role: "Performance Marketer, E-commerce",
-                  content: "Từ ngày dùng Banner Studio, tôi không cần phải đợi Designer mỗi khi cần test tệp quảng cáo mới. Gõ vài dòng là có 50+ banner, CTR tăng 45% rõ rệt."
+                  name: t('landing.t1_name'),
+                  role: t('landing.t1_role'),
+                  content: t('landing.t1_content')
                 },
                 {
-                  name: "Chị Trần Thị Mai",
-                  role: "Giám đốc Marketing, Chuỗi Thời Trang",
-                  content: "Vấn đề brand guidelines từng làm tôi đau đầu khi dùng AI, nhưng hệ thống tự động nhận diện logo và vị trí của Banner Studio thực sự là cứu cánh."
+                  name: t('landing.t2_name'),
+                  role: t('landing.t2_role'),
+                  content: t('landing.t2_content')
                 },
                 {
-                  name: "Anh Lê Minh Hoàng",
-                  role: "Chủ thương hiệu Dược phẩm",
-                  content: "Tính năng xuất batch lớn giúp chúng tôi tạo hàng trăm biến thể cho từng dòng sản phẩm khác nhau chỉ trong chưa tới 1 phút. Tuyệt vời!"
+                  name: t('landing.t3_name'),
+                  role: t('landing.t3_role'),
+                  content: t('landing.t3_content')
                 }
-              ].map((t, i) => (
+              ].map((item, i) => (
                 <div key={i} className="p-8 rounded-3xl border border-foreground/5 bg-foreground/[0.01]">
                   <div className="flex items-center gap-1 mb-6">
                     {[1,2,3,4,5].map(star => <Star key={star} className="h-4 w-4 fill-primary text-primary" />)}
                   </div>
-                  <p className="text-lg font-medium mb-8 leading-relaxed">"{t.content}"</p>
+                  <p className="text-lg font-medium mb-8 leading-relaxed">"{item.content}"</p>
                   <div>
-                    <div className="font-bold">{t.name}</div>
-                    <div className="text-sm text-muted-foreground">{t.role}</div>
+                    <div className="font-bold">{item.name}</div>
+                    <div className="text-sm text-muted-foreground">{item.role}</div>
                   </div>
                 </div>
               ))}
@@ -284,60 +284,60 @@ function LandingPage() {
         <section id="pricing" className="py-20 md:py-32 bg-foreground/[0.02] border-t border-foreground/5">
           <div className="mx-auto max-w-7xl px-6">
             <div className="text-center mb-16 md:mb-24">
-              <h2 className="text-3xl md:text-5xl font-black tracking-tight mb-4">Bảng giá đơn giản, minh bạch</h2>
-              <p className="text-muted-foreground text-lg max-w-2xl mx-auto">Chọn gói phù hợp với nhu cầu sản xuất hình ảnh của bạn.</p>
+              <h2 className="text-3xl md:text-5xl font-black tracking-tight mb-4">{t('landing.pricing_title')}</h2>
+              <p className="text-muted-foreground text-lg max-w-2xl mx-auto">{t('landing.pricing_desc')}</p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
               {/* Dùng thử */}
               <div className="p-8 rounded-3xl border border-foreground/10 bg-background flex flex-col">
-                <h3 className="text-2xl font-bold mb-2">Dùng thử</h3>
-                <p className="text-muted-foreground mb-6">Trải nghiệm đầy đủ tính năng cốt lõi</p>
-                <div className="text-4xl font-black mb-8">Miễn phí</div>
+                <h3 className="text-2xl font-bold mb-2">{t('landing.plan_free')}</h3>
+                <p className="text-muted-foreground mb-6">{t('landing.plan_free_desc')}</p>
+                <div className="text-4xl font-black mb-8">{t('landing.plan_free_price')}</div>
                 <div className="space-y-4 mb-8 flex-1">
-                  <div className="flex items-center gap-3"><Check className="h-5 w-5 text-primary" /> 50 Banners / tháng</div>
-                  <div className="flex items-center gap-3"><Check className="h-5 w-5 text-primary" /> Hỗ trợ chèn 1 Logo</div>
-                  <div className="flex items-center gap-3"><Check className="h-5 w-5 text-primary" /> Mẫu prompt cơ bản</div>
+                  <div className="flex items-center gap-3"><Check className="h-5 w-5 text-primary" /> {t('landing.plan_free_f1')}</div>
+                  <div className="flex items-center gap-3"><Check className="h-5 w-5 text-primary" /> {t('landing.plan_free_f2')}</div>
+                  <div className="flex items-center gap-3"><Check className="h-5 w-5 text-primary" /> {t('landing.plan_free_f3')}</div>
                 </div>
                 <Link to="/login" className="w-full">
-                  <Button variant="outline" className="w-full h-12 rounded-xl font-bold text-base border-foreground/20">Bắt đầu miễn phí</Button>
+                  <Button variant="outline" className="w-full h-12 rounded-xl font-bold text-base border-foreground/20">{t('landing.cta_start')}</Button>
                 </Link>
               </div>
 
               {/* Professional */}
               <div className="p-8 rounded-3xl border-2 border-primary bg-background flex flex-col relative shadow-2xl shadow-primary/10 scale-100 md:scale-105 z-10">
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-primary text-white px-4 py-1 rounded-full text-xs font-bold uppercase tracking-wider">
-                  Phổ biến nhất
+                  {t('landing.plan_pro_badge')}
                 </div>
-                <h3 className="text-2xl font-bold mb-2">Professional</h3>
-                <p className="text-muted-foreground mb-6">Phù hợp Marketer và Agency</p>
-                <div className="text-4xl font-black mb-8">999k <span className="text-lg text-muted-foreground font-normal">/ tháng</span></div>
+                <h3 className="text-2xl font-bold mb-2">{t('landing.plan_pro')}</h3>
+                <p className="text-muted-foreground mb-6">{t('landing.plan_pro_desc')}</p>
+                <div className="text-4xl font-black mb-8">{t('landing.plan_pro_price')} <span className="text-lg text-muted-foreground font-normal">{t('landing.plan_pro_period')}</span></div>
                 <div className="space-y-4 mb-8 flex-1">
-                  <div className="flex items-center gap-3"><Check className="h-5 w-5 text-primary" /> 2,000 Banners / tháng</div>
-                  <div className="flex items-center gap-3"><Check className="h-5 w-5 text-primary" /> Tùy chỉnh Logo & KOL Avatar</div>
-                  <div className="flex items-center gap-3"><Check className="h-5 w-5 text-primary" /> Tính năng Advanced Prompt</div>
-                  <div className="flex items-center gap-3"><Check className="h-5 w-5 text-primary" /> Tải hàng loạt (ZIP)</div>
-                  <div className="flex items-center gap-3"><Check className="h-5 w-5 text-primary" /> Hỗ trợ ưu tiên</div>
+                  <div className="flex items-center gap-3"><Check className="h-5 w-5 text-primary" /> {t('landing.plan_pro_f1')}</div>
+                  <div className="flex items-center gap-3"><Check className="h-5 w-5 text-primary" /> {t('landing.plan_pro_f2')}</div>
+                  <div className="flex items-center gap-3"><Check className="h-5 w-5 text-primary" /> {t('landing.plan_pro_f3')}</div>
+                  <div className="flex items-center gap-3"><Check className="h-5 w-5 text-primary" /> {t('landing.plan_pro_f4')}</div>
+                  <div className="flex items-center gap-3"><Check className="h-5 w-5 text-primary" /> {t('landing.plan_pro_f5')}</div>
                 </div>
                 <Link to="/login" className="w-full">
-                  <Button className="w-full h-12 rounded-xl font-bold text-base bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/20">Nâng cấp Pro</Button>
+                  <Button className="w-full h-12 rounded-xl font-bold text-base bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/20">{t('landing.plan_pro_cta')}</Button>
                 </Link>
               </div>
 
               {/* Enterprise */}
               <div className="p-8 rounded-3xl border border-foreground/10 bg-background flex flex-col">
-                <h3 className="text-2xl font-bold mb-2">Enterprise</h3>
-                <p className="text-muted-foreground mb-6">Giải pháp riêng cho doanh nghiệp lớn</p>
-                <div className="text-4xl font-black mb-8">Liên hệ</div>
+                <h3 className="text-2xl font-bold mb-2">{t('landing.plan_ent')}</h3>
+                <p className="text-muted-foreground mb-6">{t('landing.plan_ent_desc')}</p>
+                <div className="text-4xl font-black mb-8">{t('landing.plan_ent_price')}</div>
                 <div className="space-y-4 mb-8 flex-1">
-                  <div className="flex items-center gap-3"><Check className="h-5 w-5 text-primary" /> Không giới hạn Banners</div>
-                  <div className="flex items-center gap-3"><Check className="h-5 w-5 text-primary" /> Custom AI Model (Trained)</div>
-                  <div className="flex items-center gap-3"><Check className="h-5 w-5 text-primary" /> API Tích hợp hệ thống nội bộ</div>
-                  <div className="flex items-center gap-3"><Check className="h-5 w-5 text-primary" /> Máy chủ riêng biệt</div>
-                  <div className="flex items-center gap-3"><Check className="h-5 w-5 text-primary" /> Hỗ trợ 24/7 trực tiếp</div>
+                  <div className="flex items-center gap-3"><Check className="h-5 w-5 text-primary" /> {t('landing.plan_ent_f1')}</div>
+                  <div className="flex items-center gap-3"><Check className="h-5 w-5 text-primary" /> {t('landing.plan_ent_f2')}</div>
+                  <div className="flex items-center gap-3"><Check className="h-5 w-5 text-primary" /> {t('landing.plan_ent_f3')}</div>
+                  <div className="flex items-center gap-3"><Check className="h-5 w-5 text-primary" /> {t('landing.plan_ent_f4')}</div>
+                  <div className="flex items-center gap-3"><Check className="h-5 w-5 text-primary" /> {t('landing.plan_ent_f5')}</div>
                 </div>
                 <a href="https://zalo.me/0989890022" target="_blank" rel="noreferrer" className="w-full">
-                  <Button variant="outline" className="w-full h-12 rounded-xl font-bold text-base border-foreground/20">Liên hệ tư vấn</Button>
+                  <Button variant="outline" className="w-full h-12 rounded-xl font-bold text-base border-foreground/20">{t('landing.plan_ent_cta')}</Button>
                 </a>
               </div>
             </div>
@@ -351,20 +351,20 @@ function LandingPage() {
               <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-black/20" />
               
               <div className="relative z-10">
-                <h2 className="text-3xl md:text-5xl font-black tracking-tight mb-6">Sẵn sàng số hóa quy trình thiết kế?</h2>
+                <h2 className="text-3xl md:text-5xl font-black tracking-tight mb-6">{t('landing.cta_title')}</h2>
                 <p className="text-lg md:text-xl text-white/80 mb-10 max-w-2xl mx-auto font-medium">
-                  Đăng ký dùng thử miễn phí ngay hôm nay. Không cần thẻ tín dụng, không ràng buộc.
+                  {t('landing.cta_desc')}
                 </p>
                 
                 <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                   <Link to="/login" className="w-full sm:w-auto">
                     <Button size="lg" className="w-full sm:w-auto h-14 px-10 text-base font-bold rounded-xl bg-white text-primary hover:bg-white/90 shadow-lg">
-                      Bắt đầu miễn phí
+                      {t('landing.cta_start')}
                     </Button>
                   </Link>
                   <a href="https://cal.com/victorchuyen/coachai" target="_blank" rel="noreferrer" className="w-full sm:w-auto">
                     <Button variant="outline" size="lg" className="w-full sm:w-auto h-14 px-10 text-base font-bold rounded-xl border-white/30 text-white hover:bg-white/10 hover:text-white">
-                      <Calendar className="h-5 w-5 mr-2" /> Đặt lịch tư vấn
+                      <Calendar className="h-5 w-5 mr-2" /> {t('landing.cta_consult')}
                     </Button>
                   </a>
                 </div>
@@ -385,7 +385,7 @@ function LandingPage() {
                    Banner Studio<span className="text-primary tracking-normal ml-1">·</span>Pro
                  </span>
                </div>
-               <p className="text-sm text-muted-foreground mb-6 leading-relaxed">Giải pháp AI tự động hóa sản xuất Banner chuyên nghiệp hàng loạt. Powered by Coach.io.vn</p>
+               <p className="text-sm text-muted-foreground mb-6 leading-relaxed">{t('landing.footer_desc')}</p>
                
                <div className="space-y-3 text-sm font-medium text-foreground">
                  <a href="mailto:support@coach.io.vn" className="flex items-center gap-2 hover:text-primary transition-colors">
@@ -395,50 +395,50 @@ function LandingPage() {
                    <Phone className="h-4 w-4 text-muted-foreground" /> Zalo/Viber/Whatsapp: 098.989.0022
                  </a>
                  <a href="https://cal.com/victorchuyen/coachai" target="_blank" rel="noreferrer" className="flex items-center gap-2 hover:text-primary transition-colors">
-                   <Calendar className="h-4 w-4 text-muted-foreground" /> Đặt lịch tư vấn
+                   <Calendar className="h-4 w-4 text-muted-foreground" /> {t('landing.cta_consult')}
                  </a>
                </div>
             </div>
 
-            {/* Khám phá */}
+            {/* Explore */}
             <div className="flex flex-col gap-4">
-               <span className="font-bold mb-2">Khám phá</span>
-               <a href="#features" className="text-sm text-muted-foreground hover:text-primary transition-colors">Tính năng</a>
-               <a href="#pricing" className="text-sm text-muted-foreground hover:text-primary transition-colors">Bảng giá</a>
-               <a href="#testimonials" className="text-sm text-muted-foreground hover:text-primary transition-colors">Khách hàng</a>
+               <span className="font-bold mb-2">{t('landing.footer_explore')}</span>
+               <a href="#features" className="text-sm text-muted-foreground hover:text-primary transition-colors">{t('nav.features')}</a>
+               <a href="#pricing" className="text-sm text-muted-foreground hover:text-primary transition-colors">{t('nav.pricing')}</a>
+               <a href="#testimonials" className="text-sm text-muted-foreground hover:text-primary transition-colors">{t('nav.customers')}</a>
                <a href="https://github.com/tncsharetool" target="_blank" rel="noreferrer" className="text-sm text-muted-foreground hover:text-primary transition-colors flex items-center gap-1.5">
                  <Github className="h-3.5 w-3.5" /> GitHub (Victor Chuyen)
                </a>
             </div>
 
-            {/* Cộng đồng hỗ trợ */}
+            {/* Community */}
             <div className="flex flex-col gap-4">
-               <span className="font-bold mb-2">Cộng đồng hỗ trợ</span>
+               <span className="font-bold mb-2">{t('landing.footer_community')}</span>
                <a href="https://www.facebook.com/groups/vibecodecoaching" target="_blank" rel="noreferrer" className="text-sm text-muted-foreground hover:text-primary transition-colors flex items-center gap-1.5">
-                 <Users className="h-3.5 w-3.5" /> Group Facebook
+                 <Users className="h-3.5 w-3.5" /> {t('landing.footer_fb_group')}
                </a>
                <a href="https://zalo.me/g/tdhmtu261" target="_blank" rel="noreferrer" className="text-sm text-muted-foreground hover:text-primary transition-colors flex items-center gap-1.5">
-                 <MessageCircle className="h-3.5 w-3.5" /> Group Zalo
+                 <MessageCircle className="h-3.5 w-3.5" /> {t('landing.footer_zalo_group')}
                </a>
                <a href="https://t.me/vibecodocoaching" target="_blank" rel="noreferrer" className="text-sm text-muted-foreground hover:text-primary transition-colors flex items-center gap-1.5">
-                 <Send className="h-3.5 w-3.5" /> Group Telegram
+                 <Send className="h-3.5 w-3.5" /> {t('landing.footer_tg_group')}
                </a>
             </div>
 
-            {/* Liên hệ Admin */}
+            {/* Admin */}
             <div className="flex flex-col gap-4">
-               <span className="font-bold mb-2">Admin · Victor Chuyen</span>
+               <span className="font-bold mb-2">{t('landing.footer_admin')}</span>
                <a href="https://t.me/victorchuyen" target="_blank" rel="noreferrer" className="text-sm text-muted-foreground hover:text-primary transition-colors flex items-center gap-1.5">
-                 <Send className="h-3.5 w-3.5" /> Telegram cá nhân
+                 <Send className="h-3.5 w-3.5" /> {t('landing.footer_tg_admin')}
                </a>
                <a href="https://zalo.me/0989890022" target="_blank" rel="noreferrer" className="text-sm text-muted-foreground hover:text-primary transition-colors flex items-center gap-1.5">
-                 <MessageCircle className="h-3.5 w-3.5" /> Zalo/Viber/Whatsapp
+                 <MessageCircle className="h-3.5 w-3.5" /> {t('landing.footer_zalo_admin')}
                </a>
                <a href="mailto:support@coach.io.vn" className="text-sm text-muted-foreground hover:text-primary transition-colors flex items-center gap-1.5">
                  <Mail className="h-3.5 w-3.5" /> support@coach.io.vn
                </a>
                <a href="https://cal.com/victorchuyen/coachai" target="_blank" rel="noreferrer" className="text-sm text-muted-foreground hover:text-primary transition-colors flex items-center gap-1.5">
-                 <Calendar className="h-3.5 w-3.5" /> Đặt lịch tư vấn 1:1
+                 <Calendar className="h-3.5 w-3.5" /> {t('landing.footer_book_1on1')}
                </a>
             </div>
           </div>
@@ -446,8 +446,8 @@ function LandingPage() {
           <div className="mt-20 pt-8 border-t border-foreground/5 flex flex-col md:flex-row items-center justify-between gap-4">
              <p className="text-sm text-muted-foreground">© 2026 TNC Solutions · Powered by <a href="https://coach.io.vn" target="_blank" rel="noreferrer" className="hover:text-primary">Coach.io.vn</a></p>
              <div className="flex gap-6 text-sm text-muted-foreground">
-               <a href="#" className="hover:text-primary">Bảo mật</a>
-               <a href="#" className="hover:text-primary">Điều khoản</a>
+               <a href="#" className="hover:text-primary">{t('landing.footer_privacy')}</a>
+               <a href="#" className="hover:text-primary">{t('landing.footer_terms')}</a>
              </div>
           </div>
         </div>
