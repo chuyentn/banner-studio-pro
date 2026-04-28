@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Sparkles, Zap, ShieldCheck, Layers, ArrowRight, Star, CheckCircle2, ImageIcon, Moon, Sun, Check, MessageCircle, Mail, Wand2 } from "lucide-react";
+import { Sparkles, Zap, ShieldCheck, Layers, ArrowRight, Star, CheckCircle2, ImageIcon, Moon, Sun, Check, MessageCircle, Mail, Wand2, ExternalLink, Github, Send, Users, Phone, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTranslation } from "react-i18next";
 import { useTheme } from "next-themes";
@@ -84,9 +84,9 @@ function LandingPage() {
                   Bắt đầu miễn phí
                 </Button>
               </Link>
-              <a href="https://zalo.me/0989890022" target="_blank" rel="noreferrer" className="w-full sm:w-auto">
+              <a href="https://cal.com/victorchuyen/coachai" target="_blank" rel="noreferrer" className="w-full sm:w-auto">
                 <Button variant="outline" size="lg" className="w-full sm:w-auto h-14 px-8 text-base font-bold rounded-xl border-foreground/10 hover:bg-foreground/5 transition-all">
-                  Đặt lịch tư vấn 30p
+                  <Calendar className="h-5 w-5 mr-2" /> Đặt lịch tư vấn
                 </Button>
               </a>
             </div>
@@ -96,8 +96,11 @@ function LandingPage() {
               <a href="https://zalo.me/0989890022" className="flex items-center gap-2 hover:text-primary transition-colors">
                 <MessageCircle className="h-4 w-4" /> Zalo: 098.989.0022
               </a>
-              <a href="mailto:contact@tnc.io.vn" className="flex items-center gap-2 hover:text-primary transition-colors">
-                <Mail className="h-4 w-4" /> contact@tnc.io.vn
+              <a href="mailto:support@coach.io.vn" className="flex items-center gap-2 hover:text-primary transition-colors">
+                <Mail className="h-4 w-4" /> support@coach.io.vn
+              </a>
+              <a href="https://cal.com/victorchuyen/coachai" target="_blank" rel="noreferrer" className="flex items-center gap-2 hover:text-primary transition-colors">
+                <Calendar className="h-4 w-4" /> Đặt lịch tư vấn
               </a>
             </div>
           </div>
@@ -279,9 +282,9 @@ function LandingPage() {
                       Bắt đầu miễn phí
                     </Button>
                   </Link>
-                  <a href="https://zalo.me/0989890022" target="_blank" rel="noreferrer" className="w-full sm:w-auto">
+                  <a href="https://cal.com/victorchuyen/coachai" target="_blank" rel="noreferrer" className="w-full sm:w-auto">
                     <Button variant="outline" size="lg" className="w-full sm:w-auto h-14 px-10 text-base font-bold rounded-xl border-white/30 text-white hover:bg-white/10 hover:text-white">
-                      Đặt lịch tư vấn 30p
+                      <Calendar className="h-5 w-5 mr-2" /> Đặt lịch tư vấn
                     </Button>
                   </a>
                 </div>
@@ -294,42 +297,74 @@ function LandingPage() {
       {/* ─── FOOTER ────────────────────────────────────────────────────────── */}
       <footer className="py-20 border-t border-foreground/5 bg-background">
         <div className="mx-auto max-w-7xl px-6">
-          <div className="flex flex-col md:flex-row justify-between items-start gap-16">
-            <div className="max-w-xs">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 lg:gap-16">
+            {/* Brand */}
+            <div>
                <div className="flex items-center gap-2 mb-6">
                  <span className="text-xl font-black tracking-tighter uppercase">
                    Banner Studio<span className="text-primary tracking-normal ml-1">·</span>Pro
                  </span>
                </div>
-               <p className="text-sm text-muted-foreground mb-6 leading-relaxed">Giải pháp AI tự động hóa sản xuất Banner chuyên nghiệp hàng loạt.</p>
+               <p className="text-sm text-muted-foreground mb-6 leading-relaxed">Giải pháp AI tự động hóa sản xuất Banner chuyên nghiệp hàng loạt. Powered by Coach.io.vn</p>
                
                <div className="space-y-3 text-sm font-medium text-foreground">
-                 <a href="mailto:contact@tnc.io.vn" className="flex items-center gap-2 hover:text-primary transition-colors">
-                   <Mail className="h-4 w-4 text-muted-foreground" /> contact@tnc.io.vn
+                 <a href="mailto:support@coach.io.vn" className="flex items-center gap-2 hover:text-primary transition-colors">
+                   <Mail className="h-4 w-4 text-muted-foreground" /> support@coach.io.vn
                  </a>
                  <a href="https://zalo.me/0989890022" className="flex items-center gap-2 hover:text-primary transition-colors">
-                   <MessageCircle className="h-4 w-4 text-muted-foreground" /> Zalo: 098.989.0022
+                   <Phone className="h-4 w-4 text-muted-foreground" /> Zalo/Viber/Whatsapp: 098.989.0022
+                 </a>
+                 <a href="https://cal.com/victorchuyen/coachai" target="_blank" rel="noreferrer" className="flex items-center gap-2 hover:text-primary transition-colors">
+                   <Calendar className="h-4 w-4 text-muted-foreground" /> Đặt lịch tư vấn
                  </a>
                </div>
             </div>
-            
-            <div className="grid grid-cols-2 gap-16">
-               <div className="flex flex-col gap-4">
-                  <span className="font-bold mb-2">Khám phá</span>
-                  <a href="#features" className="text-sm text-muted-foreground hover:text-primary transition-colors">Tính năng</a>
-                  <a href="#pricing" className="text-sm text-muted-foreground hover:text-primary transition-colors">Bảng giá</a>
-                  <a href="#testimonials" className="text-sm text-muted-foreground hover:text-primary transition-colors">Khách hàng</a>
-               </div>
-               <div className="flex flex-col gap-4">
-                  <span className="font-bold mb-2">Công ty</span>
-                  <a href="https://tnc.io.vn" target="_blank" rel="noreferrer" className="text-sm text-muted-foreground hover:text-primary transition-colors">Về TNC Solutions</a>
-                  <a href="https://zalo.me/0989890022" target="_blank" rel="noreferrer" className="text-sm text-muted-foreground hover:text-primary transition-colors">Liên hệ tư vấn</a>
-               </div>
+
+            {/* Khám phá */}
+            <div className="flex flex-col gap-4">
+               <span className="font-bold mb-2">Khám phá</span>
+               <a href="#features" className="text-sm text-muted-foreground hover:text-primary transition-colors">Tính năng</a>
+               <a href="#pricing" className="text-sm text-muted-foreground hover:text-primary transition-colors">Bảng giá</a>
+               <a href="#testimonials" className="text-sm text-muted-foreground hover:text-primary transition-colors">Khách hàng</a>
+               <a href="https://github.com/tncsharetool" target="_blank" rel="noreferrer" className="text-sm text-muted-foreground hover:text-primary transition-colors flex items-center gap-1.5">
+                 <Github className="h-3.5 w-3.5" /> GitHub (Victor Chuyen)
+               </a>
+            </div>
+
+            {/* Cộng đồng hỗ trợ */}
+            <div className="flex flex-col gap-4">
+               <span className="font-bold mb-2">Cộng đồng hỗ trợ</span>
+               <a href="https://www.facebook.com/groups/vibecodecoaching" target="_blank" rel="noreferrer" className="text-sm text-muted-foreground hover:text-primary transition-colors flex items-center gap-1.5">
+                 <Users className="h-3.5 w-3.5" /> Group Facebook
+               </a>
+               <a href="https://zalo.me/g/tdhmtu261" target="_blank" rel="noreferrer" className="text-sm text-muted-foreground hover:text-primary transition-colors flex items-center gap-1.5">
+                 <MessageCircle className="h-3.5 w-3.5" /> Group Zalo
+               </a>
+               <a href="https://t.me/vibecodocoaching" target="_blank" rel="noreferrer" className="text-sm text-muted-foreground hover:text-primary transition-colors flex items-center gap-1.5">
+                 <Send className="h-3.5 w-3.5" /> Group Telegram
+               </a>
+            </div>
+
+            {/* Liên hệ Admin */}
+            <div className="flex flex-col gap-4">
+               <span className="font-bold mb-2">Admin · Victor Chuyen</span>
+               <a href="https://t.me/victorchuyen" target="_blank" rel="noreferrer" className="text-sm text-muted-foreground hover:text-primary transition-colors flex items-center gap-1.5">
+                 <Send className="h-3.5 w-3.5" /> Telegram cá nhân
+               </a>
+               <a href="https://zalo.me/0989890022" target="_blank" rel="noreferrer" className="text-sm text-muted-foreground hover:text-primary transition-colors flex items-center gap-1.5">
+                 <MessageCircle className="h-3.5 w-3.5" /> Zalo/Viber/Whatsapp
+               </a>
+               <a href="mailto:support@coach.io.vn" className="text-sm text-muted-foreground hover:text-primary transition-colors flex items-center gap-1.5">
+                 <Mail className="h-3.5 w-3.5" /> support@coach.io.vn
+               </a>
+               <a href="https://cal.com/victorchuyen/coachai" target="_blank" rel="noreferrer" className="text-sm text-muted-foreground hover:text-primary transition-colors flex items-center gap-1.5">
+                 <Calendar className="h-3.5 w-3.5" /> Đặt lịch tư vấn 1:1
+               </a>
             </div>
           </div>
           
           <div className="mt-20 pt-8 border-t border-foreground/5 flex flex-col md:flex-row items-center justify-between gap-4">
-             <p className="text-sm text-muted-foreground">© 2026 TNC Solutions. All rights reserved.</p>
+             <p className="text-sm text-muted-foreground">© 2026 TNC Solutions · Powered by <a href="https://coach.io.vn" target="_blank" rel="noreferrer" className="hover:text-primary">Coach.io.vn</a></p>
              <div className="flex gap-6 text-sm text-muted-foreground">
                <a href="#" className="hover:text-primary">Bảo mật</a>
                <a href="#" className="hover:text-primary">Điều khoản</a>
